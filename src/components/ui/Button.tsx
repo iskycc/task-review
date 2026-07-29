@@ -8,6 +8,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   variant?: ButtonVariant
   size?: ButtonSize
   loading?: boolean
+  asChild?: boolean
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -29,10 +30,27 @@ const sizeClasses: Record<ButtonSize, string> = {
   lg: 'h-12 px-6 text-base',
 }
 
+function Slot({ children, ...props }: { children: React.ReactNode } & Record<string, unknown>) {
+  const child = React.Children.only(children) as React.ReactElement<{
+    className?: string
+    children?: React.ReactNode
+  }>
+  return React.cloneElement(child, {
+    ...props,
+    ...child.props,
+    className: [props.className, child.props.className].filter(Boolean).join(' '),
+    children: (props.children as React.ReactNode | undefined) ?? child.props.children,
+  })
+}
+
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = 'primary', size = 'md', loading = false, children, disabled, className = '', ...props }, ref) => {
+  (
+    { variant = 'primary', size = 'md', loading = false, asChild = false, children, disabled, className = '', ...props },
+    ref,
+  ) => {
+    const Comp = asChild ? Slot : 'button'
     return (
-      <button
+      <Comp
         ref={ref}
         disabled={disabled || loading}
         className={[
@@ -47,7 +65,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
         {children}
-      </button>
+      </Comp>
     )
   },
 )

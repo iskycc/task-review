@@ -1,10 +1,8 @@
-'use client'
-
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { FileText } from 'lucide-react'
-import { type ReactNode } from 'react'
 import { Button, Card, Progress } from '@/components/ui'
 import { ProjectStatusBadge } from './ProjectStatusBadge'
+import { type ReactNode } from 'react'
 
 export interface ProjectCardData {
   id: string
@@ -24,20 +22,18 @@ export function ProjectCard({ data }: { data: ProjectCardData }) {
   const processed = data.passedTasks + data.deferredTasks
   const percent = data.totalTasks > 0 ? Math.round((processed / data.totalTasks) * 100) : 0
 
-  const router = useRouter()
-
   let action: ReactNode = null
   if (data.status === 'READY' || data.status === 'REVIEWING') {
     const label = data.status === 'READY' ? '开始审核' : '继续审核'
     action = (
-      <Button size="sm" onClick={() => router.push(`/projects/${data.id}/review/${data.lastSequence ?? 1}`)}>
-        {label}
+      <Button asChild size="sm">
+        <Link href={`/projects/${data.id}/review/${data.lastSequence ?? 1}`}>{label}</Link>
       </Button>
     )
   } else if (data.status === 'COMPLETED') {
     action = (
-      <Button variant="secondary" size="sm" onClick={() => router.push(`/projects/${data.id}/result`)}>
-        查看结果
+      <Button asChild variant="secondary" size="sm">
+        <Link href={`/projects/${data.id}/result`}>查看结果</Link>
       </Button>
     )
   }
