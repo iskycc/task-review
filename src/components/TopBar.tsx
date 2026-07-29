@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import { type ReactNode } from 'react'
 import { Moon, Sun, Monitor } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
 
 export function TopBar() {
-  const { theme, resolvedTheme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 h-14 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-xl">
@@ -42,13 +43,14 @@ function ThemeButton({
   active: boolean
   onClick: () => void
   label: string
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={active}
+      aria-label={label}
       title={label}
       className={[
         'rounded-md p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]',
