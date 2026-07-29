@@ -85,6 +85,16 @@ describe('GET /api/projects/[projectId]/tasks?status=', () => {
     expect((await res.json()).task).toBeNull()
   })
 
+  it('accepts lowercase status filter', async () => {
+    const { project } = await setup()
+    const res = await getTasks(
+      makeJsonRequest(`/api/projects/${project.id}/tasks?status=pending`, 'GET'),
+      { params: Promise.resolve({ projectId: project.id }) },
+    )
+    expect(res.status).toBe(200)
+    expect((await res.json()).task?.sequence).toBe(1)
+  })
+
   it('rejects invalid status filter', async () => {
     const { project } = await setup()
     const res = await getTasks(

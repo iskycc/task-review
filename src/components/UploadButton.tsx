@@ -24,6 +24,7 @@ export function UploadButton() {
       const body = await res.json()
       if (!res.ok) {
         setState({ phase: 'error', message: body.error ?? '上传失败，请重试' })
+        router.refresh()
         return
       }
       setState({ phase: 'success', taskCount: body.taskCount })

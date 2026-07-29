@@ -9,7 +9,7 @@ type Params = { params: Promise<{ projectId: string }> }
 
 export async function GET(request: NextRequest, { params }: Params) {
   const { projectId } = await params
-  const status = request.nextUrl.searchParams.get('status')
+  const status = request.nextUrl.searchParams.get('status')?.toUpperCase()
   if (!status || !VALID_STATUSES.has(status)) {
     return NextResponse.json({ error: '无效的状态筛选' }, { status: 400 })
   }
