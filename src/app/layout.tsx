@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="min-h-screen bg-[var(--bg)] pt-14">
+      <body className="min-h-screen bg-[var(--bg)] pt-16">
         <ThemeProvider>
           <TopBar />
           {children}

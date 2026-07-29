@@ -9,16 +9,20 @@ export function TopBar() {
   const { theme, setTheme } = useTheme()
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-14 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-xl">
+    <header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-xl backdrop-saturate-[1.8]">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
         <Link
           href="/"
-          className="text-lg font-semibold tracking-tight text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded-md"
+          className="rounded-md text-[17px] font-semibold tracking-[-0.02em] text-[var(--text-primary)] transition-colors duration-200 hover:text-[var(--text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
           PDF Task Review
         </Link>
 
-        <div className="flex items-center gap-1 rounded-lg bg-[var(--surface-secondary)] p-1">
+        <div
+          role="group"
+          aria-label="主题"
+          className="flex items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--surface-secondary)] p-1"
+        >
           <ThemeButton active={theme === 'light'} onClick={() => setTheme('light')} label="浅色">
             <Sun className="h-4 w-4" />
           </ThemeButton>
@@ -53,10 +57,10 @@ function ThemeButton({
       aria-label={label}
       title={label}
       className={[
-        'rounded-md p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]',
+        'rounded-full p-1.5 transition-all duration-200 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]',
         active
           ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-sm'
-          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+          : 'text-[var(--text-secondary)] hover:bg-[var(--surface-tertiary)] hover:text-[var(--text-primary)]',
       ].join(' ')}
     >
       {children}
