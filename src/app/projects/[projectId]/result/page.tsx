@@ -59,10 +59,10 @@ export default async function ResultPage({ params }: Params) {
   const percent = project.totalTasks > 0 ? Math.round((processed / project.totalTasks) * 100) : 0
 
   const statItems = [
-    { label: '任务总数', value: project.totalTasks, icon: FileText },
-    { label: '已通过', value: project.passedTasks, icon: CheckCircle2 },
-    { label: '暂时遗留', value: project.deferredTasks, icon: PauseCircle },
-    { label: '待处理', value: project.pendingTasks, icon: Circle },
+    { label: '任务总数', value: project.totalTasks, icon: FileText, className: 'text-[var(--text-primary)]' },
+    { label: '已通过', value: project.passedTasks, icon: CheckCircle2, className: 'text-[var(--success)]' },
+    { label: '暂时遗留', value: project.deferredTasks, icon: PauseCircle, className: 'text-[var(--warning)]' },
+    { label: '待处理', value: project.pendingTasks, icon: Circle, className: project.pendingTasks > 0 ? 'text-[var(--danger)]' : 'text-[var(--text-primary)]' },
   ]
 
   return (
@@ -81,13 +81,13 @@ export default async function ResultPage({ params }: Params) {
 
       <Card className="mt-6 p-6 sm:p-8">
         <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {statItems.map(({ label, value, icon: Icon }) => (
+          {statItems.map(({ label, value, icon: Icon, className }) => (
             <div key={label} className="rounded-xl bg-[var(--surface-secondary)] p-4">
               <dt className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)]">
                 <Icon className="h-3.5 w-3.5" aria-hidden="true" />
                 {label}
               </dt>
-              <dd className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">{value}</dd>
+              <dd className={`mt-2 text-2xl font-semibold ${className}`}>{value}</dd>
             </div>
           ))}
         </dl>

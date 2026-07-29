@@ -12,7 +12,7 @@ export default async function HomePage() {
     <main className="mx-auto max-w-4xl px-6 py-8">
       <div className="mb-8 flex items-end justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">Projects</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">项目</h1>
           <p className="mt-1 text-[var(--text-secondary)]">上传 PDF，逐项审核任务</p>
         </div>
         <UploadButton />
