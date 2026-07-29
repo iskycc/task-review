@@ -1,21 +1,25 @@
 import Link from 'next/link'
-import { FileQuestion } from 'lucide-react'
+import { ArrowLeft, FileQuestion } from 'lucide-react'
 import { Button, Card } from '@/components/ui'
 
 export default function NotFound() {
   return (
-    <main className="mx-auto flex max-w-md flex-col items-center px-6 py-20 text-center">
-      <Card className="w-full p-8 sm:p-10">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
-          <FileQuestion className="h-8 w-8" aria-hidden="true" />
+    <main className="mx-auto flex max-w-lg flex-col items-center px-6 py-24 text-center sm:py-32">
+      <Card className="w-full p-10 sm:p-14">
+        <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+          <FileQuestion className="h-10 w-10" strokeWidth={1.5} aria-hidden="true" />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">页面或项目不存在</h1>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+        <p className="text-sm font-semibold tracking-[0.2em] text-[var(--accent)]">404</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--text-primary)]">页面或项目不存在</h1>
+        <p className="mx-auto mt-4 max-w-xs text-base leading-relaxed text-[var(--text-secondary)]">
           你访问的页面可能已被移除，或项目 ID 不存在。
         </p>
-        <div className="mt-6">
-          <Button asChild>
-            <Link href="/">返回项目列表</Link>
+        <div className="mt-10">
+          <Button asChild size="lg" className="min-w-44">
+            <Link href="/">
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              返回项目列表
+            </Link>
           </Button>
         </div>
       </Card>
