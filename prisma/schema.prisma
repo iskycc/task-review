@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id               String   @id @default(cuid())
+  name             String
+  originalFileName String
+  filePath         String
+  fileSize         Int
+  status           String   @default("PARSING")
+  parseError       String?
+  totalTasks       Int      @default(0)
+  passedTasks      Int      @default(0)
+  deferredTasks    Int      @default(0)
+  pendingTasks     Int      @default(0)
+  lastTaskId       String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  tasks            Task[]
+}
+
+model Task {
+  id         String    @id @default(cuid())
+  projectId  String
+  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sequence   Int
+  content    String
+  pageNumber Int?
+  lineNumber Int?
+  status     String    @default("PENDING")
+  remark     String?
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([projectId, sequence])
+  @@index([projectId, status])
+}
