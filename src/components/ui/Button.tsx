@@ -49,10 +49,20 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const Comp = asChild ? Slot : 'button'
+    const isDisabled = disabled || loading
+    const content = asChild ? (
+      children
+    ) : (
+      <>
+        {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+        {children}
+      </>
+    )
+
     return (
       <Comp
         ref={ref}
-        disabled={disabled || loading}
+        {...(!asChild ? { disabled: isDisabled } : {})}
         className={[
           'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
@@ -63,8 +73,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ].join(' ')}
         {...props}
       >
-        {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-        {children}
+        {content}
       </Comp>
     )
   },
