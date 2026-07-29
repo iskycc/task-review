@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { FileText } from 'lucide-react'
+import { Button, Card, Progress } from '@/components/ui'
 import { ProjectStatusBadge } from './ProjectStatusBadge'
 
 export interface ProjectCardData {
@@ -19,69 +21,62 @@ export function ProjectCard({ data }: { data: ProjectCardData }) {
   const processed = data.passedTasks + data.deferredTasks
   const percent = data.totalTasks > 0 ? Math.round((processed / data.totalTasks) * 100) : 0
 
-  let entry: React.ReactNode = null
+  let action: React.ReactNode = null
   if (data.status === 'READY' || data.status === 'REVIEWING') {
     const label = data.status === 'READY' ? '开始审核' : '继续审核'
-    const seq = data.lastSequence ?? 1
-    entry = (
-      <Link
-        href={`/projects/${data.id}/review/${seq}`}
-        className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-      >
-        {label}
+    action = (
+      <Link href={`/projects/${data.id}/review/${data.lastSequence ?? 1}`}>
+        <Button size="sm">{label}</Button>
       </Link>
     )
   } else if (data.status === 'COMPLETED') {
-    entry = (
-      <Link
-        href={`/projects/${data.id}/result`}
-        className="rounded-lg bg-gray-700 px-3 py-1.5 text-sm text-white hover:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-700"
-      >
-        查看结果
+    action = (
+      <Link href={`/projects/${data.id}/result`}>
+        <Button variant="secondary" size="sm">查看结果</Button>
       </Link>
     )
   }
 
   return (
-    <li className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h2 className="truncate text-lg font-semibold">{data.name}</h2>
-          <p className="mt-0.5 text-sm text-gray-500">
-            {data.originalFileName} · {data.createdAt.toLocaleString('zh-CN')}
-          </p>
+    <Card className="p-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
+            <FileText className="h-6 w-6" aria-hidden="true" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="truncate text-base font-semibold text-[var(--text-primary)]">{data.name}</h2>
+            <p className="truncate text-sm text-[var(--text-secondary)]">
+              {data.originalFileName} · {data.createdAt.toLocaleString('zh-CN')}
+            </p>
+          </div>
         </div>
-        <ProjectStatusBadge status={data.status} />
+
+        <div className="flex items-center gap-3">
+          <ProjectStatusBadge status={data.status} />
+          {action}
+        </div>
       </div>
 
-      {data.status === 'PARSING' && <p className="mt-3 text-sm text-gray-600">正在解析 PDF 并创建任务…</p>}
       {data.status === 'FAILED' && (
-        <p className="mt-3 text-sm text-red-700">导入失败：{data.parseError ?? '未知原因'}</p>
+        <p className="mt-4 text-sm text-[var(--danger)]">导入失败：{data.parseError ?? '未知原因'}</p>
       )}
 
-      {data.totalTasks > 0 && (
-        <div className="mt-3">
-          <div className="flex justify-between text-sm text-gray-600">
+      {data.status === 'PARSING' && (
+        <p className="mt-4 text-sm text-[var(--text-secondary)]">正在解析 PDF 并创建任务…</p>
+      )}
+
+      {data.totalTasks > 0 && data.status !== 'FAILED' && (
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
             <span>
-              共 {data.totalTasks} 条 · 已通过 {data.passedTasks} · 暂留 {data.deferredTasks} · 待处理{' '}
-              {data.pendingTasks}
+              共 {data.totalTasks} 条 · 已通过 {data.passedTasks} · 暂留 {data.deferredTasks} · 待处理 {data.pendingTasks}
             </span>
             <span>{percent}%</span>
           </div>
-          <div
-            className="mt-1 h-2 w-full rounded-full bg-gray-200"
-            role="progressbar"
-            aria-valuenow={percent}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={`审核进度 ${percent}%`}
-          >
-            <div className="h-2 rounded-full bg-blue-600" style={{ width: `${percent}%` }} />
-          </div>
+          <Progress value={processed} max={data.totalTasks} label={`审核进度 ${percent}%`} />
         </div>
       )}
-
-      {entry && <div className="mt-4">{entry}</div>}
-    </li>
+    </Card>
   )
 }

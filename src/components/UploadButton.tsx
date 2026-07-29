@@ -2,6 +2,8 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Upload } from 'lucide-react'
+import { Button } from '@/components/ui'
 
 type UploadState =
   | { phase: 'idle' }
@@ -47,20 +49,16 @@ export function UploadButton() {
           e.target.value = ''
         }}
       />
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => inputRef.current?.click()}
-        className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-      >
-        {busy ? '上传中…' : '上传 PDF'}
-      </button>
+      <Button onClick={() => inputRef.current?.click()} loading={busy} disabled={busy}>
+        <Upload className="h-4 w-4" aria-hidden="true" />
+        上传 PDF
+      </Button>
       <div aria-live="polite" className="mt-2 text-sm">
-        {state.phase === 'busy' && <p className="text-gray-600">{state.message}</p>}
+        {state.phase === 'busy' && <p className="text-[var(--text-secondary)]">{state.message}</p>}
         {state.phase === 'success' && (
-          <p className="text-green-700">导入成功，已创建 {state.taskCount} 条任务。</p>
+          <p className="text-[var(--success)]">导入成功，已创建 {state.taskCount} 条任务。</p>
         )}
-        {state.phase === 'error' && <p className="text-red-700">{state.message}</p>}
+        {state.phase === 'error' && <p className="text-[var(--danger)]">{state.message}</p>}
       </div>
     </div>
   )
