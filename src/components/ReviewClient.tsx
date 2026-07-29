@@ -110,7 +110,10 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
         return
       }
       const wasPending = task.status === 'PENDING'
-      setTask({ ...task, status, remark: remarkDraft === '' ? null : remarkDraft })
+      const updated = { ...task, status, remark: remarkDraft === '' ? null : remarkDraft }
+      setTask(updated)
+      // Keep the prefetch cache in sync so revisiting this sequence shows the saved state
+      cacheRef.current.set(task.sequence, updated)
       setProcessed((p) => (wasPending ? p + 1 : p))
       setFeedback({ kind: 'ok', text: '已保存' })
       if (isLast) {
