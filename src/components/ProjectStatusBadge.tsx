@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui'
+import type { BadgeVariant } from '@/components/ui'
 
-const STATUS_MAP: Record<string, { label: string; variant: import('@/components/ui').BadgeVariant }> = {
+const STATUS_MAP: Record<string, { label: string; variant: BadgeVariant }> = {
   PARSING: { label: '解析中', variant: 'info' },
   FAILED: { label: '导入失败', variant: 'danger' },
   READY: { label: '待审核', variant: 'default' },

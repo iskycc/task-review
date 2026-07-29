@@ -2,7 +2,6 @@ import { FileText } from 'lucide-react'
 import { listProjects } from '@/lib/services/project-service'
 import { UploadButton } from '@/components/UploadButton'
 import { ProjectCard } from '@/components/ProjectCard'
-import { Button } from '@/components/ui'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,9 +25,6 @@ export default async function HomePage() {
           </div>
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">还没有审核项目</h2>
           <p className="mt-1 text-[var(--text-secondary)]">点击右上角“上传 PDF”创建第一个 Project</p>
-          <div className="mt-6">
-            <Button>上传 PDF</Button>
-          </div>
         </div>
       ) : (
         <ul className="space-y-4">
