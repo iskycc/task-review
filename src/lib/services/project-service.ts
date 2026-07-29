@@ -82,7 +82,7 @@ export async function createProjectFromPdf(file: File): Promise<CreateProjectRes
     if (errorName === 'PasswordException') {
       return fail('PDF 已加密，当前版本暂不支持加密文件')
     }
-    console.error(`[project-service] PDF parse failed for project ${project.id}:`, errorName || error)
+    console.error(`[project-service] PDF parse failed for project ${project.id}:`, error)
     return fail('PDF 解析失败，文件可能已损坏，请更换文件重试')
   }
 }
