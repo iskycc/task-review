@@ -29,6 +29,8 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
   const [feedback, setFeedback] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const cacheRef = useRef(new Map<number, TaskData>([[initialTask.sequence, initialTask]]))
+  // Incremented on every nav/save attempt so stale async results are discarded
+  const actionTokenRef = useRef(0)
 
   const dirty = remarkDraft !== (task.remark ?? '')
   const isFirst = task.sequence <= 1
@@ -82,7 +84,9 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
   const navigate = async (seq: number) => {
     if (seq < 1 || seq > project.totalTasks || saving) return
     if (dirty && !window.confirm('备注尚未保存，是否放弃修改并继续？')) return
+    const token = ++actionTokenRef.current
     const next = await fetchTask(seq)
+    if (token !== actionTokenRef.current) return
     if (!next) {
       setFeedback({ kind: 'error', text: '加载失败，请检查网络后重试' })
       return
@@ -92,6 +96,8 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
 
   const saveReview = async (status: 'PASSED' | 'DEFERRED') => {
     if (saving) return
+    // Invalidate any in-flight navigation so its result cannot overwrite the save
+    actionTokenRef.current += 1
     if (status === 'DEFERRED' && remarkDraft.trim().length === 0) {
       setFeedback({ kind: 'error', text: '暂时遗留必须填写备注' })
       return
@@ -121,7 +127,11 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
         return
       }
       const next = await fetchTask(task.sequence + 1)
-      if (next) applyTask(next)
+      if (next) {
+        // Apply first so the success feedback survives applyTask's reset
+        applyTask(next)
+        setFeedback({ kind: 'ok', text: '已保存' })
+      }
     } catch {
       setFeedback({ kind: 'error', text: '网络异常，保存失败，请重试' })
     } finally {
