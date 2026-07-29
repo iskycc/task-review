@@ -9,25 +9,27 @@ export default async function HomePage() {
   const items = await listProjects()
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-8">
-      <div className="mb-8 flex items-end justify-between">
+    <main className="mx-auto max-w-4xl px-6 py-12 sm:py-16">
+      <div className="mb-10 flex items-end justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">项目</h1>
-          <p className="mt-1 text-[var(--text-secondary)]">上传 PDF，逐项审核任务</p>
+          <h1 className="text-4xl font-bold tracking-tight text-[var(--text-primary)]">项目</h1>
+          <p className="mt-2 text-lg text-[var(--text-secondary)]">上传 PDF，逐项审核任务</p>
         </div>
         <UploadButton />
       </div>
 
       {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-[var(--border)] bg-[var(--surface)] py-20 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
-            <FileText className="h-8 w-8" aria-hidden="true" />
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-[var(--border)] bg-[var(--surface)] px-6 py-24 text-center shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-none">
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--accent)]/10 text-[var(--accent)]">
+            <FileText className="h-10 w-10" aria-hidden="true" />
           </div>
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]">还没有审核项目</h2>
-          <p className="mt-1 text-[var(--text-secondary)]">点击右上角“上传 PDF”创建第一个 Project</p>
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">还没有审核项目</h2>
+          <p className="mt-2 max-w-sm leading-relaxed text-[var(--text-secondary)]">
+            上传 PDF 文件，自动解析并创建任务，开始你的第一次审核
+          </p>
         </div>
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-5">
           {items.map(({ project, lastSequence }) => (
             <li key={project.id}>
               <ProjectCard

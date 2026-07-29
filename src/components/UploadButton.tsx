@@ -37,7 +37,7 @@ export function UploadButton() {
   }
 
   return (
-    <div>
+    <div className="shrink-0">
       <input
         ref={inputRef}
         type="file"
@@ -49,11 +49,11 @@ export function UploadButton() {
           e.target.value = ''
         }}
       />
-      <Button onClick={() => inputRef.current?.click()} loading={busy} disabled={busy}>
-        <Upload className="h-4 w-4" aria-hidden="true" />
+      <Button size="lg" onClick={() => inputRef.current?.click()} loading={busy} disabled={busy}>
+        <Upload className="h-5 w-5" aria-hidden="true" />
         上传 PDF
       </Button>
-      <div aria-live="polite" className="mt-2 text-sm">
+      <div aria-live="polite" className="mt-2 text-right text-sm">
         {state.phase === 'busy' && <p className="text-[var(--text-secondary)]">{state.message}</p>}
         {state.phase === 'success' && (
           <p className="text-[var(--success)]">导入成功，已创建 {state.taskCount} 条任务。</p>
