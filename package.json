@@ -9,6 +9,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:push": "prisma db push",
+    "sample:pdf": "node scripts/make-sample-pdf.mjs",
     "db:generate": "prisma generate",
     "postinstall": "prisma generate"
   },
