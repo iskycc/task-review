@@ -21,9 +21,9 @@ export default async function ReviewPage({ params }: Params) {
     return (
       <main className="mx-auto max-w-3xl px-6 py-12 text-center">
         <p className="text-[var(--text-secondary)]">项目正在解析中，请稍后在项目列表重新进入。</p>
-        <Link href="/" className="mt-6 inline-block">
-          <Button variant="secondary">返回项目列表</Button>
-        </Link>
+        <Button variant="secondary" asChild className="mt-6">
+          <Link href="/">返回项目列表</Link>
+        </Button>
       </main>
     )
   }
@@ -42,12 +42,12 @@ export default async function ReviewPage({ params }: Params) {
   return (
     <main className="mx-auto max-w-3xl px-6 py-6">
       <div className="mb-6 flex items-center justify-between">
-        <Link href="/">
-          <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/">
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             返回项目列表
-          </Button>
-        </Link>
+          </Link>
+        </Button>
         <span className="text-sm font-medium text-[var(--text-secondary)]">{project.name}</span>
       </div>
 

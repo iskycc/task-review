@@ -74,6 +74,7 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
     setTask(next)
     setRemarkDraft(next.remark ?? '')
     setFeedback(null)
+    // Use native history.replaceState to update the URL only, avoiding a Next.js route transition/re-fetch.
     window.history.replaceState(null, '', `/projects/${project.id}/review/${next.sequence}`)
   }
 
@@ -96,6 +97,7 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
       setFeedback({ kind: 'error', text: '暂时遗留必须填写备注' })
       return
     }
+    // Increment token to cancel any stale in-flight navigation fetches after save completes.
     actionTokenRef.current += 1
     setSaving(true)
     setFeedback(null)
