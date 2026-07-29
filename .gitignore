@@ -1,0 +1,8 @@
+node_modules/
+.next/
+*.tsbuildinfo
+next-env.d.ts
+data/
+prisma/*.db
+prisma/*.db-journal
+.env
