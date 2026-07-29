@@ -137,40 +137,46 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
     }
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-[var(--text-secondary)]">
-            第 {task.sequence} / {project.totalTasks} 条
-          </p>
-          <p className="text-xs text-[var(--text-secondary)]">
-            已处理 {processed} / {project.totalTasks}
-          </p>
-        </div>
-        <div className="w-1/2 max-w-xs">
-          <Progress value={processed} max={project.totalTasks} label="审核进度" />
-        </div>
-      </div>
+  const percent = project.totalTasks > 0 ? Math.round((processed / project.totalTasks) * 100) : 0
+  const remaining = Math.max(0, project.totalTasks - processed)
 
-      <Card className="p-6 sm:p-8">
+  return (
+    <div className="space-y-8">
+      <header className="space-y-3">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
+              第 {task.sequence} <span className="font-normal text-[var(--text-secondary)]">/ {project.totalTasks}</span> 条
+            </p>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+              已处理 {processed} · 剩余 {remaining}
+            </p>
+          </div>
+          <p className="shrink-0 text-sm font-semibold tabular-nums text-[var(--text-primary)]">{percent}%</p>
+        </div>
+        <Progress value={processed} max={project.totalTasks} label="审核进度" />
+      </header>
+
+      <Card className="p-8 sm:p-10">
         <div
           ref={contentRef}
           tabIndex={-1}
-          className="outline-none focus-visible:rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bg)]"
+          className="outline-none focus-visible:rounded-2xl focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--surface)]"
         >
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-6 flex items-center justify-between gap-3">
             <TaskStatusBadge status={task.status} />
             {task.pageNumber !== null && (
-              <span className="text-xs font-medium text-[var(--text-secondary)]">第 {task.pageNumber} 页</span>
+              <span className="rounded-full bg-[var(--surface-secondary)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)]">
+                第 {task.pageNumber} 页
+              </span>
             )}
           </div>
-          <p className="whitespace-pre-wrap break-words text-xl leading-relaxed text-[var(--text-primary)] sm:text-2xl">
+          <p className="whitespace-pre-wrap break-words text-2xl leading-relaxed text-[var(--text-primary)] sm:text-[1.75rem]">
             {task.content}
           </p>
         </div>
 
-        <div className="mt-8">
+        <div className="mt-10 border-t border-[var(--border)] pt-8">
           <TextArea
             id="remark"
             label="备注"
@@ -183,38 +189,40 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
           />
         </div>
 
-        <div aria-live="polite" className="mt-4 min-h-6">
+        <div aria-live="polite" className="mt-3 min-h-6">
           {feedback?.kind === 'ok' && <p className="text-sm font-medium text-[var(--success)]">{feedback.text}</p>}
           {feedback?.kind === 'error' && <p className="text-sm font-medium text-[var(--danger)]">{feedback.text}</p>}
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={isFirst || saving}
-            onClick={() => void navigate(task.sequence - 1)}
-          >
-            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-            上一条
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={isLast || saving}
-            onClick={() => void navigate(task.sequence + 1)}
-          >
-            下一条/跳过
-            <ChevronRight className="h-4 w-4" aria-hidden="true" />
-          </Button>
-          <div className="ml-auto flex items-center gap-3">
-            <Button loading={saving} disabled={saving} onClick={() => void saveReview('PASSED')}>
-              <Check className="h-4 w-4" aria-hidden="true" />
-              通过
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1 rounded-full bg-[var(--surface-secondary)] p-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isFirst || saving}
+              onClick={() => void navigate(task.sequence - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+              上一条
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isLast || saving}
+              onClick={() => void navigate(task.sequence + 1)}
+            >
+              下一条/跳过
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          </div>
+          <div className="ml-auto flex items-center gap-2">
             <Button variant="warning" loading={saving} disabled={saving} onClick={() => void saveReview('DEFERRED')}>
               <PauseCircle className="h-4 w-4" aria-hidden="true" />
               暂时遗留
+            </Button>
+            <Button loading={saving} disabled={saving} onClick={() => void saveReview('PASSED')}>
+              <Check className="h-4 w-4" aria-hidden="true" />
+              通过
             </Button>
           </div>
         </div>
