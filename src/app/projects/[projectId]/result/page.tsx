@@ -17,7 +17,7 @@ function RingProgress({ percent }: { percent: number }) {
   const offset = circumference - (safe / 100) * circumference
 
   return (
-    <div className="relative inline-flex items-center justify-center">
+    <div className="relative inline-flex items-center justify-center" aria-hidden="true">
       <svg width={radius * 2} height={radius * 2} aria-hidden="true">
         <circle
           stroke="var(--surface-secondary)"
@@ -59,10 +59,10 @@ export default async function ResultPage({ params }: Params) {
   const percent = project.totalTasks > 0 ? Math.round((processed / project.totalTasks) * 100) : 0
 
   const statItems = [
-    { label: '任务总数', value: project.totalTasks, icon: FileText, variant: 'default' as const },
-    { label: '已通过', value: project.passedTasks, icon: CheckCircle2, variant: 'success' as const },
-    { label: '暂时遗留', value: project.deferredTasks, icon: PauseCircle, variant: 'warning' as const },
-    { label: '待处理', value: project.pendingTasks, icon: Circle, variant: project.pendingTasks > 0 ? ('danger' as const) : ('default' as const) },
+    { label: '任务总数', value: project.totalTasks, icon: FileText },
+    { label: '已通过', value: project.passedTasks, icon: CheckCircle2 },
+    { label: '暂时遗留', value: project.deferredTasks, icon: PauseCircle },
+    { label: '待处理', value: project.pendingTasks, icon: Circle },
   ]
 
   return (
@@ -81,7 +81,7 @@ export default async function ResultPage({ params }: Params) {
 
       <Card className="mt-6 p-6 sm:p-8">
         <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {statItems.map(({ label, value, icon: Icon, variant }) => (
+          {statItems.map(({ label, value, icon: Icon }) => (
             <div key={label} className="rounded-xl bg-[var(--surface-secondary)] p-4">
               <dt className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)]">
                 <Icon className="h-3.5 w-3.5" aria-hidden="true" />
