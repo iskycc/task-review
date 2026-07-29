@@ -1,7 +1,7 @@
 export interface ProgressProps {
   value: number
   max?: number
-  label?: string
+  label: string
 }
 
 export function Progress({ value, max = 100, label }: ProgressProps) {
@@ -13,7 +13,7 @@ export function Progress({ value, max = 100, label }: ProgressProps) {
       aria-valuenow={Math.round(percent)}
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-label={label ?? '进度'}
+      aria-label={label}
     >
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface-secondary)]">
         <div
