@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { ChevronLeft, ChevronRight, Check, PauseCircle } from 'lucide-react'
+import { Button, Card, Progress, TextArea } from '@/components/ui'
 import { TaskStatusBadge } from './TaskStatusBadge'
 
 interface TaskData {
@@ -29,7 +30,6 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
   const [feedback, setFeedback] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const cacheRef = useRef(new Map<number, TaskData>([[initialTask.sequence, initialTask]]))
-  // Incremented on every nav/save attempt so stale async results are discarded
   const actionTokenRef = useRef(0)
 
   const dirty = remarkDraft !== (task.remark ?? '')
@@ -53,23 +53,19 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
     [project.id],
   )
 
-  // Prefetch adjacent tasks
   useEffect(() => {
     if (!isFirst) void fetchTask(task.sequence - 1)
     if (!isLast) void fetchTask(task.sequence + 1)
   }, [task.sequence, isFirst, isLast, fetchTask])
 
-  // Save last position (best-effort; failure must not block browsing)
   useEffect(() => {
     void fetch(`/api/projects/${project.id}/progress`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ taskId: task.id }),
     }).catch(() => undefined)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project.id, task.id])
 
-  // Move focus to the content area after switching tasks
   useEffect(() => {
     contentRef.current?.focus()
   }, [task.id])
@@ -96,12 +92,11 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
 
   const saveReview = async (status: 'PASSED' | 'DEFERRED') => {
     if (saving) return
-    // Invalidate any in-flight navigation so its result cannot overwrite the save
-    actionTokenRef.current += 1
     if (status === 'DEFERRED' && remarkDraft.trim().length === 0) {
       setFeedback({ kind: 'error', text: '暂时遗留必须填写备注' })
       return
     }
+    actionTokenRef.current += 1
     setSaving(true)
     setFeedback(null)
     try {
@@ -115,21 +110,22 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
         setFeedback({ kind: 'error', text: body.error ?? '保存失败，请重试' })
         return
       }
-      const wasPending = task.status === 'PENDING'
-      const updated = { ...task, status, remark: remarkDraft === '' ? null : remarkDraft }
-      setTask(updated)
-      // Keep the prefetch cache in sync so revisiting this sequence shows the saved state
+      const updated: TaskData = { ...task, status, remark: remarkDraft === '' ? null : remarkDraft }
       cacheRef.current.set(task.sequence, updated)
+      const wasPending = task.status === 'PENDING'
+      setTask(updated)
       setProcessed((p) => (wasPending ? p + 1 : p))
-      setFeedback({ kind: 'ok', text: '已保存' })
+
       if (isLast) {
+        setFeedback({ kind: 'ok', text: '已保存' })
         router.push(`/projects/${project.id}/result`)
         return
       }
       const next = await fetchTask(task.sequence + 1)
       if (next) {
-        // Apply first so the success feedback survives applyTask's reset
         applyTask(next)
+        setFeedback({ kind: 'ok', text: '已保存' })
+      } else {
         setFeedback({ kind: 'ok', text: '已保存' })
       }
     } catch {
@@ -140,89 +136,87 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
-      <div className="flex items-center justify-between text-sm">
-        <Link href="/" className="text-blue-600 underline focus-visible:outline-2 focus-visible:outline-blue-600">
-          ← 返回项目列表
-        </Link>
-        <span className="text-gray-500">{project.name}</span>
-      </div>
-
-      <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
-        <span>
-          第 {task.sequence} / {project.totalTasks} 条
-        </span>
-        <span>
-          已处理 {processed} / {project.totalTasks}
-        </span>
-      </div>
-
-      <div
-        ref={contentRef}
-        tabIndex={-1}
-        className="mt-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-      >
-        <div className="flex items-center justify-between">
-          <TaskStatusBadge status={task.status} />
-          {task.pageNumber !== null && <span className="text-xs text-gray-500">第 {task.pageNumber} 页</span>}
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-[var(--text-secondary)]">
+            第 {task.sequence} / {project.totalTasks} 条
+          </p>
+          <p className="text-xs text-[var(--text-secondary)]">
+            已处理 {processed} / {project.totalTasks}
+          </p>
         </div>
-        <p className="mt-4 whitespace-pre-wrap break-words text-lg leading-relaxed">{task.content}</p>
+        <div className="w-1/2 max-w-xs">
+          <Progress value={processed} max={project.totalTasks} label="审核进度" />
+        </div>
       </div>
 
-      <div className="mt-4">
-        <label htmlFor="remark" className="block text-sm font-medium text-gray-700">
-          备注（暂时遗留时必填，不超过 2000 字）
-        </label>
-        <textarea
-          id="remark"
-          value={remarkDraft}
-          maxLength={2000}
-          rows={3}
-          onChange={(e) => setRemarkDraft(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm focus-visible:outline-2 focus-visible:outline-blue-600"
-          placeholder="填写备注…"
-        />
-      </div>
+      <Card className="p-6 sm:p-8">
+        <div
+          ref={contentRef}
+          tabIndex={-1}
+          className="outline-none focus-visible:rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--bg)]"
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <TaskStatusBadge status={task.status} />
+            {task.pageNumber !== null && (
+              <span className="text-xs font-medium text-[var(--text-secondary)]">第 {task.pageNumber} 页</span>
+            )}
+          </div>
+          <p className="whitespace-pre-wrap break-words text-xl leading-relaxed text-[var(--text-primary)] sm:text-2xl">
+            {task.content}
+          </p>
+        </div>
 
-      <div aria-live="polite" className="mt-2 min-h-5 text-sm">
-        {feedback?.kind === 'ok' && <p className="text-green-700">{feedback.text}</p>}
-        {feedback?.kind === 'error' && <p className="text-red-700">{feedback.text}</p>}
-      </div>
+        <div className="mt-8">
+          <TextArea
+            id="remark"
+            label="备注"
+            hint="暂时遗留时必填，不超过 2000 字"
+            value={remarkDraft}
+            maxLength={2000}
+            rows={3}
+            onChange={(e) => setRemarkDraft(e.target.value)}
+            placeholder="填写备注…"
+          />
+        </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <button
-          type="button"
-          disabled={isFirst || saving}
-          onClick={() => void navigate(task.sequence - 1)}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-blue-600"
-        >
-          上一条
-        </button>
-        <button
-          type="button"
-          disabled={isLast || saving}
-          onClick={() => void navigate(task.sequence + 1)}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-blue-600"
-        >
-          下一条/跳过
-        </button>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => void saveReview('PASSED')}
-          className="rounded-lg bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
-        >
-          {saving ? '保存中…' : '通过'}
-        </button>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => void saveReview('DEFERRED')}
-          className="rounded-lg bg-amber-500 px-3 py-2 text-sm text-white hover:bg-amber-600 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
-        >
-          {saving ? '保存中…' : '暂时遗留'}
-        </button>
-      </div>
-    </main>
+        <div aria-live="polite" className="mt-4 min-h-6">
+          {feedback?.kind === 'ok' && <p className="text-sm font-medium text-[var(--success)]">{feedback.text}</p>}
+          {feedback?.kind === 'error' && <p className="text-sm font-medium text-[var(--danger)]">{feedback.text}</p>}
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={isFirst || saving}
+            onClick={() => void navigate(task.sequence - 1)}
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+            上一条
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={isLast || saving}
+            onClick={() => void navigate(task.sequence + 1)}
+          >
+            下一条/跳过
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          </Button>
+          <div className="ml-auto flex items-center gap-3">
+            <Button loading={saving} disabled={saving} onClick={() => void saveReview('PASSED')}>
+              <Check className="h-4 w-4" aria-hidden="true" />
+              通过
+            </Button>
+            <Button variant="warning" loading={saving} disabled={saving} onClick={() => void saveReview('DEFERRED')}>
+              <PauseCircle className="h-4 w-4" aria-hidden="true" />
+              暂时遗留
+            </Button>
+          </div>
+        </div>
+      </Card>
+    </div>
   )
 }
