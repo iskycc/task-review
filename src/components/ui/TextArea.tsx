@@ -21,9 +21,9 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
           ref={ref}
           id={id}
           className={[
-            'w-full rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)] px-4 py-3 text-sm',
+            'w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm',
             'text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)]',
             'disabled:opacity-50 disabled:cursor-not-allowed',
             error ? 'border-[var(--danger)] focus-visible:ring-[var(--danger)]' : '',
             className,

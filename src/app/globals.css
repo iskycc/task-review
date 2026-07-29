@@ -6,9 +6,10 @@
   --bg: #f5f5f7;
   --surface: #ffffff;
   --surface-secondary: #f2f2f7;
+  --surface-tertiary: #e5e5ea;
   --text-primary: #1d1d1f;
   --text-secondary: #6e6e73;
-  --border: rgba(0, 0, 0, 0.08);
+  --border: rgba(0, 0, 0, 0.06);
   --accent: #0071e3;
   --accent-hover: #0077ed;
   --success: #34c759;
@@ -20,9 +21,10 @@
   --bg: #000000;
   --surface: #1c1c1e;
   --surface-secondary: #2c2c2e;
+  --surface-tertiary: #3a3a3c;
   --text-primary: #f5f5f7;
   --text-secondary: #8e8e93;
-  --border: rgba(255, 255, 255, 0.12);
+  --border: rgba(255, 255, 255, 0.10);
   --accent: #0a84ff;
   --accent-hover: #409cff;
   --success: #30d158;
@@ -40,4 +42,27 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+/* Subtle Apple-style scrollbar (WebKit only) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--text-secondary) 38%, transparent);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--text-secondary) 56%, transparent);
 }
