@@ -13,21 +13,21 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] shadow-sm hover:shadow-[0_4px_16px_color-mix(in_srgb,var(--accent)_38%,transparent),inset_0_1px_0_rgba(255,255,255,0.22)] active:scale-[0.98]',
+    'bg-[var(--tint)] text-white hover:bg-[var(--tint-hover)] shadow-sm hover:shadow-[0_4px_16px_color-mix(in_srgb,var(--tint)_38%,transparent),inset_0_1px_0_rgba(255,255,255,0.22)] active:scale-[0.98]',
   secondary:
-    'bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:bg-[var(--surface-tertiary)] active:scale-[0.98]',
+    'bg-[var(--fill)] text-[var(--label-primary)] hover:bg-[var(--fill-hover)] active:scale-[0.98]',
   success:
     'bg-[var(--success)]/10 text-[var(--success)] hover:bg-[var(--success)]/20 active:scale-[0.98]',
   warning:
     'bg-[var(--warning)]/10 text-[var(--warning)] hover:bg-[var(--warning)]/20 active:scale-[0.98]',
   ghost:
-    'bg-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-tertiary)] hover:text-[var(--text-primary)]',
+    'bg-transparent text-[var(--label-secondary)] hover:bg-[var(--fill)] hover:text-[var(--label-primary)]',
 }
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'h-8 px-3 text-xs',
-  md: 'h-10 px-4 text-sm',
-  lg: 'h-12 px-6 text-base',
+  sm: 'h-10 min-h-10 min-w-10 px-3.5 text-xs',
+  md: 'h-11 min-h-11 min-w-11 px-4 text-sm',
+  lg: 'h-12 min-h-12 min-w-12 px-6 text-base',
 }
 
 function Slot({ children, ...props }: { children: React.ReactNode } & Record<string, unknown>) {
@@ -64,8 +64,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...(!asChild ? { disabled: isDisabled, type } : {})}
         className={[
-          'inline-flex items-center justify-center gap-2 rounded-full font-medium transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
+          'inline-flex items-center justify-center gap-2 rounded-[var(--radius-md)] font-medium',
+          'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tint)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]',
           'disabled:opacity-50 disabled:pointer-events-none',
           variantClasses[variant],
           sizeClasses[size],

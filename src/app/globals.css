@@ -3,30 +3,65 @@
 @variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg: #f5f5f7;
-  --surface: #ffffff;
+  /* Surfaces */
+  --background: #f5f5f7;
+  --surface-primary: #ffffff;
   --surface-secondary: #f2f2f7;
-  --surface-tertiary: #e5e5ea;
-  --text-primary: #1d1d1f;
-  --text-secondary: #6e6e73;
-  --border: rgba(0, 0, 0, 0.06);
-  --accent: #0071e3;
-  --accent-hover: #0077ed;
+  --surface-elevated: #ffffff;
+  --fill: rgba(0, 0, 0, 0.06);
+  --fill-hover: rgba(0, 0, 0, 0.1);
+
+  /* Separators & labels */
+  --separator: rgba(0, 0, 0, 0.08);
+  --label-primary: #1d1d1f;
+  --label-secondary: #6e6e73;
+  --label-tertiary: #86868b;
+
+  /* Tints */
+  --tint: #0071e3;
+  --tint-hover: #0077ed;
   --success: #34c759;
   --warning: #ff9f0a;
   --danger: #ff3b30;
+
+  /* Radius */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Motion */
+  --duration-fast: 140ms;
+  --duration-base: 240ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Legacy aliases — kept so existing components/pages keep working.
+     (--surface-secondary above already matches the old value.) */
+  --bg: var(--background);
+  --surface: var(--surface-primary);
+  --surface-tertiary: var(--fill);
+  --text-primary: var(--label-primary);
+  --text-secondary: var(--label-secondary);
+  --border: var(--separator);
+  --accent: var(--tint);
+  --accent-hover: var(--tint-hover);
 }
 
 .dark {
-  --bg: #000000;
-  --surface: #1c1c1e;
+  --background: #000000;
+  --surface-primary: #1c1c1e;
   --surface-secondary: #2c2c2e;
-  --surface-tertiary: #3a3a3c;
-  --text-primary: #f5f5f7;
-  --text-secondary: #8e8e93;
-  --border: rgba(255, 255, 255, 0.10);
-  --accent: #0a84ff;
-  --accent-hover: #409cff;
+  --surface-elevated: #2c2c2e;
+  --fill: rgba(255, 255, 255, 0.08);
+  --fill-hover: rgba(255, 255, 255, 0.14);
+
+  --separator: rgba(255, 255, 255, 0.1);
+  --label-primary: #f5f5f7;
+  --label-secondary: #8e8e93;
+  --label-tertiary: #636366;
+
+  --tint: #0a84ff;
+  --tint-hover: #409cff;
   --success: #30d158;
   --warning: #ffd60a;
   --danger: #ff453a;
@@ -37,15 +72,17 @@ html {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
-  background-color: var(--bg);
-  color: var(--text-primary);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI",
+    system-ui, sans-serif;
+  background-color: var(--background);
+  color: var(--label-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background-color: color-mix(in srgb, var(--accent) 22%, transparent);
+  background-color: color-mix(in srgb, var(--tint) 22%, transparent);
 }
 
 /* Subtle Apple-style scrollbar (WebKit only) */
@@ -59,10 +96,70 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: color-mix(in srgb, var(--text-secondary) 38%, transparent);
+  background-color: color-mix(in srgb, var(--label-secondary) 38%, transparent);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: color-mix(in srgb, var(--text-secondary) 56%, transparent);
+  background-color: color-mix(in srgb, var(--label-secondary) 56%, transparent);
+}
+
+/* Typography scale — semantic classes for pages/components to adopt. */
+.text-page-title {
+  font-size: 40px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.text-section-title {
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.text-card-title {
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.text-body {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.text-auxiliary {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+  .text-page-title {
+    font-size: 48px;
+  }
+  .text-section-title {
+    font-size: 28px;
+  }
+  .text-card-title {
+    font-size: 19px;
+  }
+  .text-body {
+    font-size: 17px;
+  }
+  .text-auxiliary {
+    font-size: 14px;
+  }
+}
+
+/* Respect reduced motion: zero out transitions/animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

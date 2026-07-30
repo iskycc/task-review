@@ -9,11 +9,11 @@ export function TopBar() {
   const { theme, setTheme } = useTheme()
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-xl backdrop-saturate-[1.8]">
+    <header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-[var(--separator)] bg-[var(--surface-primary)]/80 backdrop-blur-xl backdrop-saturate-[1.8]">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
         <Link
           href="/"
-          className="rounded-md text-[17px] font-semibold tracking-[-0.02em] text-[var(--text-primary)] transition-colors duration-200 hover:text-[var(--text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          className="rounded-md text-[17px] font-semibold tracking-[-0.02em] text-[var(--label-primary)] transition-colors duration-[var(--duration-fast)] hover:text-[var(--label-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tint)]"
         >
           PDF Task Review
         </Link>
@@ -21,7 +21,7 @@ export function TopBar() {
         <div
           role="group"
           aria-label="主题"
-          className="flex items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--surface-secondary)] p-1"
+          className="grid grid-cols-3 rounded-[var(--radius-full)] border border-[var(--separator)] bg-[var(--fill)] p-1"
         >
           <ThemeButton active={theme === 'light'} onClick={() => setTheme('light')} label="浅色">
             <Sun className="h-4 w-4" />
@@ -57,10 +57,10 @@ function ThemeButton({
       aria-label={label}
       title={label}
       className={[
-        'rounded-full p-1.5 transition-all duration-200 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]',
+        'flex h-11 w-11 items-center justify-center rounded-[var(--radius-full)] transition-all duration-[var(--duration-fast)] ease-[var(--ease-out)] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tint)]',
         active
-          ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-sm'
-          : 'text-[var(--text-secondary)] hover:bg-[var(--surface-tertiary)] hover:text-[var(--text-primary)]',
+          ? 'bg-[var(--surface-elevated)] text-[var(--label-primary)] shadow-sm'
+          : 'text-[var(--label-secondary)] hover:text-[var(--label-primary)]',
       ].join(' ')}
     >
       {children}

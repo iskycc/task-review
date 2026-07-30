@@ -13,7 +13,7 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]" htmlFor={id}>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--label-primary)]" htmlFor={id}>
             {label}
           </label>
         )}
@@ -21,16 +21,19 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
           ref={ref}
           id={id}
           className={[
-            'w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm',
-            'text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)]',
+            'w-full rounded-[var(--radius-md)] border border-[var(--separator)] bg-[var(--surface-primary)] px-4 py-3 text-sm',
+            'text-[var(--label-primary)] placeholder:text-[var(--label-tertiary)]',
+            'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
+            'focus-visible:outline-none focus-visible:border-[var(--tint)] focus-visible:ring-2 focus-visible:ring-[var(--tint)]/20',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            error ? 'border-[var(--danger)] focus-visible:ring-[var(--danger)]' : '',
+            error
+              ? 'border-[var(--danger)] focus-visible:border-[var(--danger)] focus-visible:ring-[var(--danger)]/20'
+              : 'hover:border-[var(--label-tertiary)]',
             className,
           ].join(' ')}
           {...props}
         />
-        {hint && !error && <p className="mt-1.5 text-xs text-[var(--text-secondary)]">{hint}</p>}
+        {hint && !error && <p className="mt-1.5 text-xs text-[var(--label-secondary)]">{hint}</p>}
         {error && <p className="mt-1.5 text-xs text-[var(--danger)]">{error}</p>}
       </div>
     )

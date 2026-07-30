@@ -15,9 +15,9 @@ export function Progress({ value, max = 100, label }: ProgressProps) {
       aria-valuemax={100}
       aria-label={label}
     >
-      <div className="h-1 w-full overflow-hidden rounded-full bg-[var(--surface-secondary)] shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] dark:bg-[var(--surface-tertiary)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.30)]">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--fill)]">
         <div
-          className="h-full rounded-full bg-[var(--accent)] transition-all duration-300 ease-out"
+          className="h-full rounded-full bg-[var(--tint)] transition-all duration-[var(--duration-base)] ease-[var(--ease-out)]"
           style={{ width: `${percent}%` }}
         />
       </div>

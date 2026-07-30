@@ -9,10 +9,5 @@ const STATUS_MAP: Record<string, { label: string; variant: BadgeVariant }> = {
 
 export function TaskStatusBadge({ status }: { status: string }) {
   const info = STATUS_MAP[status] ?? { label: status, variant: 'default' as const }
-  return (
-    <Badge variant={info.variant} className="gap-1.5">
-      <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />
-      {info.label}
-    </Badge>
-  )
+  return <Badge variant={info.variant}>{info.label}</Badge>
 }
