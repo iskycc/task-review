@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { ChevronRight, FileText } from 'lucide-react'
 import { Button, Progress, Skeleton } from '@/components/ui'
+import { formatDateTime } from '@/lib/format'
 import { ProjectStatusBadge } from './ProjectStatusBadge'
 
 export interface ProjectCardData {
@@ -19,16 +20,6 @@ export interface ProjectCardData {
   pendingTasks: number
   createdAt: Date
   lastSequence: number | null
-}
-
-function formatDate(date: Date) {
-  return date.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
 }
 
 function Stat({ color, label, value }: { color: string; label: string; value: number }) {
@@ -111,7 +102,7 @@ export function ProjectCard({ data }: { data: ProjectCardData }) {
               ) : (
                 <>
                   <span className="max-w-full truncate">{data.originalFileName}</span>
-                  <span className="shrink-0 tabular-nums">{formatDate(data.createdAt)}</span>
+                  <span className="shrink-0 tabular-nums">{formatDateTime(data.createdAt)}</span>
                   {data.totalTasks > 0 && (
                     <>
                       <span className="inline-flex items-center gap-x-3">

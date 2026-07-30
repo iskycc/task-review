@@ -97,7 +97,7 @@ export default async function ResultPage({ params }: Params) {
           <RingProgress percent={percent} />
           <h2 className="text-section-title mt-6 flex items-center gap-2 text-[var(--label-primary)]">
             {isComplete ? (
-              <CheckCircle2 className="h-6 w-6 text-[var(--success)]" aria-hidden="true" />
+              <CheckCircle2 className="h-6 w-6 text-[var(--success)] motion-safe:animate-pop-in" aria-hidden="true" />
             ) : (
               <Circle className="h-6 w-6 text-[var(--warning)]" aria-hidden="true" />
             )}

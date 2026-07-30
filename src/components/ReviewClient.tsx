@@ -285,24 +285,23 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
 
       {/* Bottom zone: sticky action bar with remark + grouped actions. */}
       <div className="sticky bottom-0 z-30 -mx-6 mt-8 border-t border-[var(--separator)] bg-[var(--background)]/85 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur-xl backdrop-saturate-[1.8]">
-        <div aria-live="polite">
-          {error && (
-            <Toast kind="error" className="mb-3">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span>{error.text}</span>
-                {error.retry && (
-                  <button
-                    type="button"
-                    onClick={error.retry}
-                    className="font-medium text-[var(--tint)] underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tint)]"
-                  >
-                    重试
-                  </button>
-                )}
-              </div>
-            </Toast>
-          )}
-        </div>
+        {/* Errors announce themselves via Toast's role="alert" — no extra aria-live wrapper. */}
+        {error && (
+          <Toast kind="error" className="mb-3">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span>{error.text}</span>
+              {error.retry && (
+                <button
+                  type="button"
+                  onClick={error.retry}
+                  className="font-medium text-[var(--tint)] underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tint)]"
+                >
+                  重试
+                </button>
+              )}
+            </div>
+          </Toast>
+        )}
 
         <div>
           <div className="mb-1.5 flex items-baseline justify-between gap-3">
@@ -394,7 +393,10 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
 
       {/* Transient success toast: floats above the action bar, never occupies layout space. */}
       {toast && (
-        <div key={toast.id} className="pointer-events-none fixed bottom-40 left-1/2 z-40 -translate-x-1/2 sm:bottom-32">
+        <div
+          key={toast.id}
+          className="pointer-events-none fixed bottom-40 left-1/2 z-40 -translate-x-1/2 motion-safe:animate-toast-in sm:bottom-32"
+        >
           <Toast kind="success" className="shadow-[0_8px_32px_rgba(0,0,0,0.16)]">{toast.text}</Toast>
         </div>
       )}

@@ -48,23 +48,28 @@
 }
 
 .dark {
-  --background: #000000;
-  --surface-primary: #1c1c1e;
-  --surface-secondary: #2c2c2e;
-  --surface-elevated: #2c2c2e;
+  color-scheme: dark;
+
+  /* Near-black (not pure #000) background with raised, closely-stepped surfaces:
+     layers separate via borders + surface levels instead of heavy shadows. */
+  --background: #111114;
+  --surface-primary: #1b1b1f;
+  --surface-secondary: #26262b;
+  --surface-elevated: #2d2d33;
   --fill: rgba(255, 255, 255, 0.08);
   --fill-hover: rgba(255, 255, 255, 0.14);
 
-  --separator: rgba(255, 255, 255, 0.1);
+  --separator: rgba(255, 255, 255, 0.14);
   --label-primary: #f5f5f7;
-  --label-secondary: #8e8e93;
-  --label-tertiary: #636366;
+  --label-secondary: #98989e;
+  --label-tertiary: #717176;
 
   --tint: #0a84ff;
   --tint-hover: #409cff;
-  --success: #30d158;
-  --warning: #ffd60a;
-  --danger: #ff453a;
+  /* Status hues slightly dimmed vs. iOS dark palette to avoid glare on dark surfaces. */
+  --success: #2fce5e;
+  --warning: #e9c30e;
+  --danger: #f6493f;
 }
 
 html {
@@ -151,6 +156,37 @@ body {
   .text-auxiliary {
     font-size: 14px;
   }
+}
+
+/* Micro-interactions: brief fade/scale entrances, no large bounces. */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@utility animate-toast-in {
+  animation: toast-in var(--duration-base) var(--ease-out) both;
+}
+
+@utility animate-pop-in {
+  animation: pop-in var(--duration-base) var(--ease-out) both;
 }
 
 /* Respect reduced motion: zero out transitions/animations. */

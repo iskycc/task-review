@@ -1,11 +1,18 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { TopBar } from '@/components/TopBar'
 
 export const metadata: Metadata = {
-  title: 'PDF Task Review',
-  description: '将 PDF 内容转换为待审核任务',
+  title: 'PDF 任务审核',
+  description: '上传 PDF 文档，自动解析为任务清单并逐项审核',
+}
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f5f5f7' },
+    { media: '(prefers-color-scheme: dark)', color: '#111114' },
+  ],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

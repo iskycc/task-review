@@ -10,7 +10,7 @@ export function TopBar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-[var(--separator)] bg-[var(--surface-primary)]/80 backdrop-blur-xl backdrop-saturate-[1.8]">
-      <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
+      <div className="mx-auto flex h-full max-w-[1080px] items-center justify-between px-6">
         <Link
           href="/"
           className="rounded-md text-[17px] font-semibold tracking-[-0.02em] text-[var(--label-primary)] transition-colors duration-[var(--duration-fast)] hover:text-[var(--label-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tint)]"
@@ -57,7 +57,7 @@ function ThemeButton({
       aria-label={label}
       title={label}
       className={[
-        'flex h-11 w-11 items-center justify-center rounded-[var(--radius-full)] transition-all duration-[var(--duration-fast)] ease-[var(--ease-out)] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tint)]',
+        'flex h-11 w-11 items-center justify-center rounded-[var(--radius-full)] transition-all duration-[var(--duration-fast)] ease-[var(--ease-out)] motion-safe:active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tint)]',
         active
           ? 'bg-[var(--surface-elevated)] text-[var(--label-primary)] shadow-sm'
           : 'text-[var(--label-secondary)] hover:text-[var(--label-primary)]',

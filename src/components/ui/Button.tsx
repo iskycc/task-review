@@ -13,13 +13,13 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-[var(--tint)] text-white hover:bg-[var(--tint-hover)] shadow-sm hover:shadow-[0_4px_16px_color-mix(in_srgb,var(--tint)_38%,transparent),inset_0_1px_0_rgba(255,255,255,0.22)] active:scale-[0.98]',
+    'bg-[var(--tint)] text-white hover:bg-[var(--tint-hover)] shadow-sm hover:shadow-[0_4px_16px_color-mix(in_srgb,var(--tint)_38%,transparent),inset_0_1px_0_rgba(255,255,255,0.22)] motion-safe:active:scale-[0.98]',
   secondary:
-    'bg-[var(--fill)] text-[var(--label-primary)] hover:bg-[var(--fill-hover)] active:scale-[0.98]',
+    'bg-[var(--fill)] text-[var(--label-primary)] hover:bg-[var(--fill-hover)] motion-safe:active:scale-[0.98]',
   success:
-    'bg-[var(--success)]/10 text-[var(--success)] hover:bg-[var(--success)]/20 active:scale-[0.98]',
+    'bg-[var(--success)]/10 text-[var(--success)] hover:bg-[var(--success)]/20 motion-safe:active:scale-[0.98]',
   warning:
-    'bg-[var(--warning)]/10 text-[var(--warning)] hover:bg-[var(--warning)]/20 active:scale-[0.98]',
+    'bg-[var(--warning)]/10 text-[var(--warning)] hover:bg-[var(--warning)]/20 motion-safe:active:scale-[0.98]',
   ghost:
     'bg-transparent text-[var(--label-secondary)] hover:bg-[var(--fill)] hover:text-[var(--label-primary)]',
 }

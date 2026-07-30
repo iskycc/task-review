@@ -184,7 +184,9 @@ export function UploadButton() {
           </div>
         )}
 
-        {phase === 'success' && <Toast kind="success">导入成功，已创建 {taskCount} 条任务。</Toast>}
+        {phase === 'success' && (
+          <Toast kind="success" className="motion-safe:animate-toast-in">导入成功，已创建 {taskCount} 条任务。</Toast>
+        )}
         {phase === 'error' && <Toast kind="error">{errorMessage}</Toast>}
       </Modal>
     </div>
