@@ -1,5 +1,6 @@
 import { FileText } from 'lucide-react'
 import { listProjects } from '@/lib/services/project-service'
+import { Card, EmptyState } from '@/components/ui'
 import { UploadButton } from '@/components/UploadButton'
 import { ProjectCard } from '@/components/ProjectCard'
 
@@ -9,47 +10,47 @@ export default async function HomePage() {
   const items = await listProjects()
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-12 sm:py-16">
-      <div className="mb-10 flex items-end justify-between gap-6">
+    <main className="mx-auto max-w-[1080px] px-6 py-10 sm:py-14">
+      <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight text-[var(--text-primary)]">项目</h1>
-          <p className="mt-2 text-lg text-[var(--text-secondary)]">上传 PDF，逐项审核任务</p>
+          <p className="text-sm font-medium text-[var(--tint)]">PDF 任务审核</p>
+          <h1 className="text-page-title mt-2 text-[var(--label-primary)]">项目</h1>
+          <p className="text-body mt-3 text-[var(--label-secondary)]">上传 PDF 文档，自动解析为任务清单并逐项审核。</p>
         </div>
-        <UploadButton />
+        {items.length > 0 && <UploadButton />}
       </div>
 
       {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-[var(--border)] bg-[var(--surface)] px-6 py-24 text-center shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-none">
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--accent)]/10 text-[var(--accent)]">
-            <FileText className="h-10 w-10" aria-hidden="true" />
-          </div>
-          <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">还没有审核项目</h2>
-          <p className="mt-2 max-w-sm leading-relaxed text-[var(--text-secondary)]">
-            上传 PDF 文件，自动解析并创建任务，开始你的第一次审核
-          </p>
-        </div>
+        <EmptyState
+          icon={<FileText className="h-6 w-6" aria-hidden="true" />}
+          title="还没有审核项目"
+          description="上传 PDF 文件，自动解析并创建任务，开始你的第一次审核"
+          action={<UploadButton />}
+        />
       ) : (
-        <ul className="space-y-5">
-          {items.map(({ project, lastSequence }) => (
-            <li key={project.id}>
-              <ProjectCard
-                data={{
-                  id: project.id,
-                  name: project.name,
-                  originalFileName: project.originalFileName,
-                  status: project.status,
-                  parseError: project.parseError,
-                  totalTasks: project.totalTasks,
-                  passedTasks: project.passedTasks,
-                  deferredTasks: project.deferredTasks,
-                  pendingTasks: project.pendingTasks,
-                  createdAt: project.createdAt,
-                  lastSequence,
-                }}
-              />
-            </li>
-          ))}
-        </ul>
+        <Card className="overflow-hidden">
+          <ul className="divide-y divide-[var(--separator)]">
+            {items.map(({ project, lastSequence }) => (
+              <li key={project.id}>
+                <ProjectCard
+                  data={{
+                    id: project.id,
+                    name: project.name,
+                    originalFileName: project.originalFileName,
+                    status: project.status,
+                    parseError: project.parseError,
+                    totalTasks: project.totalTasks,
+                    passedTasks: project.passedTasks,
+                    deferredTasks: project.deferredTasks,
+                    pendingTasks: project.pendingTasks,
+                    createdAt: project.createdAt,
+                    lastSequence,
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
     </main>
   )
