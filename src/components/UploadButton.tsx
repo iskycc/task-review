@@ -63,6 +63,8 @@ export function UploadButton() {
     setFile(next)
     if (!next.name.toLowerCase().endsWith('.pdf')) {
       setFileError('仅支持 .pdf 文件')
+    } else if (next.size === 0) {
+      setFileError('文件内容为空')
     } else if (next.size > MAX_FILE_SIZE_BYTES) {
       setFileError('文件大小超过 20 MB 限制')
     } else {
@@ -104,9 +106,9 @@ export function UploadButton() {
         <p className="mt-0.5 text-auxiliary text-[var(--label-tertiary)]">{formatFileSize(file.size)}</p>
       </div>
       {fileError ? (
-        <span className="shrink-0 text-xs text-[var(--danger)]">{fileError}</span>
+        <span className="shrink-0 text-xs text-[var(--danger-label)]">{fileError}</span>
       ) : (
-        <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--success)]" aria-label="校验通过" />
+        <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--success-label)]" aria-label="校验通过" />
       )}
     </div>
   )
@@ -155,7 +157,13 @@ export function UploadButton() {
         上传 PDF
       </Button>
 
-      <Modal open={open} onClose={closeModal} title="上传 PDF" footer={footer}>
+      <Modal
+        open={open}
+        onClose={closeModal}
+        title="上传 PDF"
+        footer={footer}
+        dismissible={phase !== 'uploading'}
+      >
         {phase === 'pick' && (
           <div>
             <button

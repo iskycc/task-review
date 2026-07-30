@@ -65,13 +65,13 @@ export default async function ResultPage({ params }: Params) {
 
   const statItems: { label: string; value: number; icon: LucideIcon; iconClass: string }[] = [
     { label: '任务总数', value: project.totalTasks, icon: FileText, iconClass: 'text-[var(--tint)]' },
-    { label: '已通过', value: project.passedTasks, icon: CheckCircle2, iconClass: 'text-[var(--success)]' },
-    { label: '暂时遗留', value: project.deferredTasks, icon: PauseCircle, iconClass: 'text-[var(--warning)]' },
+    { label: '已通过', value: project.passedTasks, icon: CheckCircle2, iconClass: 'text-[var(--success-label)]' },
+    { label: '暂时遗留', value: project.deferredTasks, icon: PauseCircle, iconClass: 'text-[var(--warning-label)]' },
     {
       label: '待处理',
       value: project.pendingTasks,
       icon: Circle,
-      iconClass: project.pendingTasks > 0 ? 'text-[var(--danger)]' : 'text-[var(--label-tertiary)]',
+      iconClass: project.pendingTasks > 0 ? 'text-[var(--danger-label)]' : 'text-[var(--label-tertiary)]',
     },
   ]
 
@@ -97,9 +97,9 @@ export default async function ResultPage({ params }: Params) {
           <RingProgress percent={percent} />
           <h2 className="text-section-title mt-6 flex items-center gap-2 text-[var(--label-primary)]">
             {isComplete ? (
-              <CheckCircle2 className="h-6 w-6 text-[var(--success)] motion-safe:animate-pop-in" aria-hidden="true" />
+              <CheckCircle2 className="h-6 w-6 text-[var(--success-label)] motion-safe:animate-pop-in" aria-hidden="true" />
             ) : (
-              <Circle className="h-6 w-6 text-[var(--warning)]" aria-hidden="true" />
+              <Circle className="h-6 w-6 text-[var(--warning-label)]" aria-hidden="true" />
             )}
             {isComplete ? '审核完成' : `还剩 ${project.pendingTasks} 条待处理`}
           </h2>

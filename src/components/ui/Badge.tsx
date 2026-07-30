@@ -10,9 +10,9 @@ export interface BadgeProps {
 
 const variants: Record<BadgeVariant, string> = {
   default: 'bg-[var(--label-tertiary)]/12 text-[var(--label-secondary)]',
-  success: 'bg-[var(--success)]/12 text-[var(--success)]',
-  warning: 'bg-[var(--warning)]/12 text-[var(--warning)]',
-  danger: 'bg-[var(--danger)]/12 text-[var(--danger)]',
+  success: 'bg-[var(--success)]/12 text-[var(--success-label)]',
+  warning: 'bg-[var(--warning)]/12 text-[var(--warning-label)]',
+  danger: 'bg-[var(--danger)]/12 text-[var(--danger-label)]',
   info: 'bg-[var(--tint)]/12 text-[var(--tint)]',
 }
 

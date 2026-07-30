@@ -34,7 +34,7 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
           {...props}
         />
         {hint && !error && <p className="mt-1.5 text-xs text-[var(--label-secondary)]">{hint}</p>}
-        {error && <p className="mt-1.5 text-xs text-[var(--danger)]">{error}</p>}
+        {error && <p className="mt-1.5 text-xs text-[var(--danger-label)]">{error}</p>}
       </div>
     )
   },

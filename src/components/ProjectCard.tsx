@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { ChevronRight, FileText } from 'lucide-react'
-import { Button, Progress, Skeleton } from '@/components/ui'
+import { Button, Progress } from '@/components/ui'
 import { formatDateTime } from '@/lib/format'
 import { ProjectStatusBadge } from './ProjectStatusBadge'
 
@@ -62,64 +62,59 @@ export function ProjectCard({ data }: { data: ProjectCardData }) {
           : null
 
   return (
-    <div className="relative flex min-h-[80px] items-center gap-4 px-5 py-4 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-[var(--fill)]/50">
+    <div
+      className={[
+        'relative flex min-h-[80px] items-center gap-4 px-5 py-4 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
+        href ? 'hover:bg-[var(--fill)]/50' : '',
+      ].join(' ')}
+    >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--fill)] text-[var(--label-tertiary)]">
         <FileText className="h-5 w-5" aria-hidden="true" />
       </div>
 
       <div className="min-w-0 flex-1">
-        {parsing ? (
-          <div aria-label="正在解析项目">
-            <div className="flex items-center gap-2.5">
-              <Skeleton className="h-4 w-44 max-w-[60%]" />
-              <ProjectStatusBadge status={data.status} />
-            </div>
-            <Skeleton className="mt-2 h-3 w-64 max-w-[80%]" />
-          </div>
-        ) : (
-          <>
-            {/* Line 1: project name (stretched link makes the whole row clickable) + status */}
-            <div className="flex items-center gap-2.5">
-              {href ? (
-                <Link
-                  href={href}
-                  className="truncate rounded-[var(--radius-sm)] text-card-title text-[var(--label-primary)] after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-[var(--tint)]"
-                >
-                  {data.name}
-                </Link>
-              ) : (
-                <h2 className="truncate text-card-title text-[var(--label-primary)]">{data.name}</h2>
-              )}
-              <span className="relative z-10 shrink-0">
-                <ProjectStatusBadge status={data.status} />
-              </span>
-            </div>
+        <div className="flex items-center gap-2.5">
+          {href ? (
+            <Link
+              href={href}
+              className="truncate rounded-[var(--radius-sm)] text-card-title text-[var(--label-primary)] after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-[var(--tint)]"
+            >
+              {data.name}
+            </Link>
+          ) : (
+            <h2 className="truncate text-card-title text-[var(--label-primary)]">{data.name}</h2>
+          )}
+          <span className="relative z-10 shrink-0">
+            <ProjectStatusBadge status={data.status} />
+          </span>
+        </div>
 
-            {/* Line 2: file name, created date, then compact review stats */}
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-auxiliary text-[var(--label-secondary)]">
-              {failed ? (
-                <span className="text-[var(--danger)]">导入失败：{data.parseError ?? '未知原因'}</span>
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-auxiliary text-[var(--label-secondary)]">
+          {failed ? (
+            <span className="text-[var(--danger-label)]">导入失败：{data.parseError ?? '未知原因'}</span>
+          ) : (
+            <>
+              <span className="max-w-full truncate">{data.originalFileName}</span>
+              <span className="shrink-0 tabular-nums">{formatDateTime(data.createdAt)}</span>
+              {parsing ? (
+                <span className="motion-safe:animate-pulse">正在解析 PDF…</span>
               ) : (
-                <>
-                  <span className="max-w-full truncate">{data.originalFileName}</span>
-                  <span className="shrink-0 tabular-nums">{formatDateTime(data.createdAt)}</span>
-                  {data.totalTasks > 0 && (
-                    <>
-                      <span className="inline-flex items-center gap-x-3">
-                        <Stat color="bg-[var(--success)]" label="通过" value={data.passedTasks} />
-                        <Stat color="bg-[var(--warning)]" label="暂留" value={data.deferredTasks} />
-                        <Stat color="bg-[var(--label-tertiary)]/50" label="待处理" value={data.pendingTasks} />
-                      </span>
-                      <span className="font-semibold tabular-nums text-[var(--label-primary)] sm:hidden">
-                        {percent}%
-                      </span>
-                    </>
-                  )}
-                </>
+                data.totalTasks > 0 && (
+                  <>
+                    <span className="inline-flex items-center gap-x-3">
+                      <Stat color="bg-[var(--success)]" label="通过" value={data.passedTasks} />
+                      <Stat color="bg-[var(--warning)]" label="暂留" value={data.deferredTasks} />
+                      <Stat color="bg-[var(--label-tertiary)]/50" label="待处理" value={data.pendingTasks} />
+                    </span>
+                    <span className="font-semibold tabular-nums text-[var(--label-primary)] sm:hidden">
+                      {percent}%
+                    </span>
+                  </>
+                )
               )}
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Right: progress percent grouped with its bar + explicit primary action */}

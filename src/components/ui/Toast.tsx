@@ -25,8 +25,8 @@ const kindConfig: Record<ToastKind, { classes: string; Icon: ComponentType<{ cla
 }
 
 const kindIconColor: Record<ToastKind, string> = {
-  success: 'text-[var(--success)]',
-  error: 'text-[var(--danger)]',
+  success: 'text-[var(--success-label)]',
+  error: 'text-[var(--danger-label)]',
   info: 'text-[var(--tint)]',
 }
 

@@ -1,0 +1,23 @@
+services:
+  app:
+    image: iskycc/pdf-task-review:${IMAGE_TAG:-latest}
+    container_name: pdf-task-review
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      DATABASE_URL: "file:/app/data/app.db"
+      UPLOAD_DIR: "/app/data/uploads"
+      PDF_MAX_SIZE_MB: "${PDF_MAX_SIZE_MB:-20}"
+    volumes:
+      - pdf-task-review-data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+volumes:
+  pdf-task-review-data:
+    name: pdf-task-review-data

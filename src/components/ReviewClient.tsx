@@ -52,6 +52,7 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
   const textRef = useRef<HTMLParagraphElement>(null)
   const cacheRef = useRef(new Map<number, TaskData>([[initialTask.sequence, initialTask]]))
   const actionTokenRef = useRef(0)
+  const savingRef = useRef(false)
 
   const dirty = remarkDraft !== (task.remark ?? '')
   const saving = savingAction !== null
@@ -91,7 +92,7 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
   }, [project.id, task.id])
 
   useEffect(() => {
-    contentRef.current?.focus()
+    contentRef.current?.focus({ preventScroll: true })
   }, [task.id])
 
   // Reset expand state per task and detect whether the text needs clamping.
@@ -166,13 +167,14 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
   }
 
   const saveReview = async (status: SavingAction) => {
-    if (saving) return
+    if (savingRef.current) return
     if (status === 'DEFERRED' && remarkDraft.trim().length === 0) {
       setError({ text: '暂时遗留必须填写备注' })
       return
     }
     // Increment token to cancel any stale in-flight navigation fetches after save completes.
     actionTokenRef.current += 1
+    savingRef.current = true
     setSavingAction(status)
     setError(null)
     try {
@@ -202,6 +204,7 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
     } catch {
       setError({ text: '网络异常，保存失败，请重试', retry: () => void saveReview(status) })
     } finally {
+      savingRef.current = false
       setSavingAction(null)
     }
   }
@@ -212,9 +215,9 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
   const nextLabel = task.status === 'PENDING' ? '跳过' : '下一条'
   const counterClass =
     remarkCount >= REMARK_LIMIT
-      ? 'text-[var(--danger)]'
+      ? 'text-[var(--danger-label)]'
       : remarkCount >= REMARK_WARN_AT
-        ? 'text-[var(--warning)]'
+        ? 'text-[var(--warning-label)]'
         : 'text-[var(--label-tertiary)]'
 
   return (
@@ -240,7 +243,8 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
         <div
           ref={contentRef}
           tabIndex={-1}
-          className="outline-none focus-visible:rounded-[var(--radius-md)] focus-visible:ring-2 focus-visible:ring-[var(--tint)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--surface-primary)]"
+          aria-labelledby={`task-content-${task.id}`}
+          className="outline-none"
         >
           <div className="mb-6 flex items-baseline justify-between gap-3">
             <TaskStatusBadge status={task.status} />
@@ -250,6 +254,7 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
           </div>
           <div className="relative">
             <p
+              id={`task-content-${task.id}`}
               ref={textRef}
               className={[
                 'max-w-[36em] whitespace-pre-wrap break-words text-[var(--label-primary)]',

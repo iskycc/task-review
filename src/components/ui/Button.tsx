@@ -17,9 +17,9 @@ const variantClasses: Record<ButtonVariant, string> = {
   secondary:
     'bg-[var(--fill)] text-[var(--label-primary)] hover:bg-[var(--fill-hover)] motion-safe:active:scale-[0.98]',
   success:
-    'bg-[var(--success)]/10 text-[var(--success)] hover:bg-[var(--success)]/20 motion-safe:active:scale-[0.98]',
+    'bg-[var(--success)]/10 text-[var(--success-label)] hover:bg-[var(--success)]/20 motion-safe:active:scale-[0.98]',
   warning:
-    'bg-[var(--warning)]/10 text-[var(--warning)] hover:bg-[var(--warning)]/20 motion-safe:active:scale-[0.98]',
+    'bg-[var(--warning)]/10 text-[var(--warning-label)] hover:bg-[var(--warning)]/20 motion-safe:active:scale-[0.98]',
   ghost:
     'bg-transparent text-[var(--label-secondary)] hover:bg-[var(--fill)] hover:text-[var(--label-primary)]',
 }
@@ -63,6 +63,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         ref={ref}
         {...(!asChild ? { disabled: isDisabled, type } : {})}
+        aria-busy={loading || undefined}
         className={[
           'inline-flex items-center justify-center gap-2 rounded-[var(--radius-md)] font-medium',
           'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
