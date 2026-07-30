@@ -20,7 +20,7 @@ export default async function ReviewPage({ params }: Params) {
   if (project.status === 'PARSING') {
     return (
       <main className="mx-auto max-w-3xl px-6 py-24 text-center">
-        <p className="text-lg text-[var(--text-secondary)]">项目正在解析中，请稍后在项目列表重新进入。</p>
+        <p className="text-lg text-[var(--label-secondary)]">项目正在解析中，请稍后在项目列表重新进入。</p>
         <Button variant="secondary" asChild className="mt-8">
           <Link href="/">返回项目列表</Link>
         </Button>
@@ -40,15 +40,16 @@ export default async function ReviewPage({ params }: Params) {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-8">
-      <div className="mb-8 flex items-center justify-between gap-4">
+    <main className="mx-auto max-w-3xl px-6 pt-6">
+      {/* Top zone: back entry + project name. */}
+      <div className="mb-5 flex items-center justify-between gap-4">
         <Button variant="ghost" size="sm" asChild className="-ml-3 shrink-0">
           <Link href="/">
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             返回项目列表
           </Link>
         </Button>
-        <span className="truncate text-sm font-medium text-[var(--text-secondary)]">{project.name}</span>
+        <span className="truncate text-sm font-medium text-[var(--label-secondary)]">{project.name}</span>
       </div>
 
       <ReviewClient
