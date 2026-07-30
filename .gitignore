@@ -6,3 +6,4 @@ data/
 prisma/*.db
 prisma/*.db-journal
 .env
+screenshots/
