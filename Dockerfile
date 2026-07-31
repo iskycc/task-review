@@ -18,7 +18,7 @@ FROM base AS dependencies
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
 COPY scripts/migrate-production.mjs ./scripts/migrate-production.mjs
-RUN npm ci
+RUN npm ci --no-audit
 
 FROM base AS builder
 
@@ -34,7 +34,7 @@ ENV HOSTNAME="0.0.0.0"
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
 COPY scripts/migrate-production.mjs ./scripts/migrate-production.mjs
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci --omit=dev --no-audit && npm cache clean --force
 
 COPY --from=builder --chown=node:node /app/.next ./.next
 COPY --from=builder --chown=node:node /app/next.config.ts ./next.config.ts
