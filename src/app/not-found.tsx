@@ -9,7 +9,7 @@ export default function NotFound() {
         <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--surface-secondary)] text-[var(--label-tertiary)]">
           <FileQuestion className="h-10 w-10" strokeWidth={1.5} aria-hidden="true" />
         </div>
-        <p className="text-sm font-semibold tracking-[0.2em] text-[var(--tint)]">404</p>
+        <p className="text-sm font-medium tracking-[0.2em] text-[var(--tint)]">404</p>
         <h1 className="text-section-title mt-3 text-[var(--label-primary)]">页面或项目不存在</h1>
         <p className="text-body mx-auto mt-4 max-w-xs text-[var(--label-secondary)]">
           你访问的页面可能已被移除，或项目 ID 不存在。

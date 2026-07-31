@@ -1,5 +1,3 @@
-import { getDocumentProxy } from 'unpdf'
-
 export interface PdfTextItem {
   str: string
   x: number
@@ -41,6 +39,23 @@ export function groupItemsIntoLines(items: PdfTextItem[], yTolerance = 3): strin
 
 /** Extracts valid text lines page by page: trimmed, blanks dropped, no dedup. */
 export async function extractLines(pdfData: Uint8Array): Promise<ExtractedLine[]> {
+  // PDF.js uses the emerging Math.sumPrecise API. Node 22/24 do not expose it
+  // yet, so provide a compensated summation fallback before loading PDF.js.
+  const math = Math as Math & { sumPrecise?: (values: Iterable<number>) => number }
+  if (!math.sumPrecise) {
+    math.sumPrecise = (values) => {
+      let sum = 0
+      let correction = 0
+      for (const value of values) {
+        const adjusted = value - correction
+        const next = sum + adjusted
+        correction = next - sum - adjusted
+        sum = next
+      }
+      return sum
+    }
+  }
+  const { getDocumentProxy } = await import('unpdf')
   const pdf = await getDocumentProxy(pdfData)
   try {
     const result: ExtractedLine[] = []

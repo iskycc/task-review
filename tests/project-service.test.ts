@@ -81,7 +81,8 @@ describe('queries', () => {
     const firstTask = await prisma.task.findFirstOrThrow({
       where: { projectId: older.projectId, sequence: 3 },
     })
-    await prisma.project.update({ where: { id: older.projectId }, data: { lastTaskId: firstTask.id } })
+    const owner = await prisma.projectMember.findFirstOrThrow({ where: { projectId: older.projectId } })
+    await prisma.reviewProgress.create({ data: { projectId: older.projectId, userId: owner.userId, lastTaskId: firstTask.id } })
 
     const list = await listProjects()
     expect(list).toHaveLength(2)
@@ -94,8 +95,11 @@ describe('queries', () => {
     if (!created.ok) throw new Error('setup failed')
     const t2 = await prisma.task.findFirstOrThrow({ where: { projectId: created.projectId, sequence: 2 } })
     const t5 = await prisma.task.findFirstOrThrow({ where: { projectId: created.projectId, sequence: 5 } })
-    await prisma.task.update({ where: { id: t2.id }, data: { status: 'PASSED' } })
-    await prisma.task.update({ where: { id: t5.id }, data: { status: 'DEFERRED', remark: '待定' } })
+    const owner = await prisma.projectMember.findFirstOrThrow({ where: { projectId: created.projectId } })
+    await prisma.taskReview.createMany({ data: [
+      { taskId: t2.id, reviewerId: owner.userId, status: 'PASSED' },
+      { taskId: t5.id, reviewerId: owner.userId, status: 'DEFERRED', remark: '待定' },
+    ] })
 
     const summary = await getProjectSummary(created.projectId)
     expect(summary).not.toBeNull()

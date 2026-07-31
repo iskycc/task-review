@@ -13,7 +13,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-[var(--tint)] text-white hover:bg-[var(--tint-hover)] shadow-sm hover:shadow-[0_4px_16px_color-mix(in_srgb,var(--tint)_38%,transparent),inset_0_1px_0_rgba(255,255,255,0.22)] motion-safe:active:scale-[0.98]',
+    'bg-[var(--tint)] text-white hover:bg-[var(--tint-hover)] shadow-[0_1px_2px_rgba(0,0,0,0.08)] motion-safe:active:scale-[0.98]',
   secondary:
     'bg-[var(--fill)] text-[var(--label-primary)] hover:bg-[var(--fill-hover)] motion-safe:active:scale-[0.98]',
   success:
@@ -50,6 +50,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const Comp = asChild ? Slot : 'button'
     const isDisabled = disabled || loading
+    const disabledLinkProps = asChild && isDisabled
+      ? {
+          'aria-disabled': true,
+          tabIndex: -1,
+          onClick: (event: React.MouseEvent) => event.preventDefault(),
+        }
+      : {}
     const content = asChild ? (
       children
     ) : (
@@ -65,7 +72,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...(!asChild ? { disabled: isDisabled, type } : {})}
         aria-busy={loading || undefined}
         className={[
-          'inline-flex items-center justify-center gap-2 rounded-[var(--radius-md)] font-medium',
+          'inline-flex items-center justify-center gap-2 rounded-[var(--radius-md)] font-medium tracking-[-0.01em]',
           'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tint)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]',
           'disabled:opacity-50 disabled:pointer-events-none',
@@ -74,6 +81,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           className,
         ].join(' ')}
         {...props}
+        {...disabledLinkProps}
       >
         {content}
       </Comp>

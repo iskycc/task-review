@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { resetDb } from './helpers/db'
 import { createProjectWithTasks } from './helpers/db'
 import { createSamplePdfBuffer } from './helpers/sample-pdf'
-import { makeUploadRequest } from './helpers/next-request'
+import { makeEmptyUploadRequest, makeJsonRequest, makeUploadRequest } from './helpers/next-request'
 import { POST, GET } from '@/app/api/projects/route'
 
 describe('POST /api/projects', () => {
@@ -18,9 +18,7 @@ describe('POST /api/projects', () => {
   })
 
   it('rejects when file missing', async () => {
-    const formData = new FormData()
-    const { NextRequest } = await import('next/server')
-    const res = await POST(new NextRequest('http://localhost/api/projects', { method: 'POST', body: formData }))
+    const res = await POST(makeEmptyUploadRequest('/api/projects'))
     expect(res.status).toBe(400)
     expect((await res.json()).error).toBe('请选择要上传的 PDF 文件')
   })
@@ -39,7 +37,7 @@ describe('GET /api/projects', () => {
   it('returns projects newest first', async () => {
     await createProjectWithTasks(['一'], { name: '项目A' })
     await createProjectWithTasks(['二'], { name: '项目B' })
-    const res = await GET()
+    const res = await GET(makeJsonRequest('/api/projects', 'GET'))
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.projects).toHaveLength(2)

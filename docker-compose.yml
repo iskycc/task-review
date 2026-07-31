@@ -1,14 +1,17 @@
 services:
   app:
-    image: iskycc/pdf-task-review:${IMAGE_TAG:-latest}
+    image: ghcr.io/iskycc/task-review:${IMAGE_TAG:-latest}
     container_name: pdf-task-review
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-3000}:3000"
+      - "${APP_HOST:-127.0.0.1}:${APP_PORT:-3000}:3000"
     environment:
       DATABASE_URL: "file:/app/data/app.db"
       UPLOAD_DIR: "/app/data/uploads"
       PDF_MAX_SIZE_MB: "${PDF_MAX_SIZE_MB:-20}"
+      PDF_PARSE_TIMEOUT_MS: "${PDF_PARSE_TIMEOUT_MS:-300000}"
+      USER_STORAGE_QUOTA_MB: "${USER_STORAGE_QUOTA_MB:-1024}"
+      ALLOW_REGISTRATION: "${ALLOW_REGISTRATION:-false}"
     volumes:
       - pdf-task-review-data:/app/data
     healthcheck:

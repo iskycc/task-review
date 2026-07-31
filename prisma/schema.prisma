@@ -8,37 +8,157 @@ datasource db {
 }
 
 model Project {
-  id               String   @id @default(cuid())
+  id               String           @id @default(cuid())
   name             String
   originalFileName String
   filePath         String
   fileSize         Int
-  status           String   @default("PARSING")
+  status           String           @default("PARSING")
   parseError       String?
-  totalTasks       Int      @default(0)
-  passedTasks      Int      @default(0)
-  deferredTasks    Int      @default(0)
-  pendingTasks     Int      @default(0)
+  totalTasks       Int              @default(0)
+  passedTasks      Int              @default(0)
+  deferredTasks    Int              @default(0)
+  pendingTasks     Int              @default(0)
   lastTaskId       String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  ownerId          String?
+  owner            User?            @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  parseStartedAt   DateTime?
+  parseCompletedAt DateTime?
+  parseAttempts    Int              @default(0)
+  uploadKey        String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
   tasks            Task[]
+  members          ProjectMember[]
+  reviewProgress   ReviewProgress[]
+
+  @@unique([ownerId, uploadKey])
+  @@index([ownerId])
 }
 
 model Task {
-  id         String    @id @default(cuid())
-  projectId  String
-  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  sequence   Int
-  content    String
-  pageNumber Int?
-  lineNumber Int?
-  status     String    @default("PENDING")
-  remark     String?
-  reviewedAt DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id              String           @id @default(cuid())
+  projectId       String
+  project         Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sequence        Int
+  content         String
+  pageNumber      Int?
+  lineNumber      Int?
+  status          String           @default("PENDING")
+  remark          String?
+  reviewedAt      DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  reviews         TaskReview[]
+  assignments     TaskAssignment[]
+  progressEntries ReviewProgress[] @relation("LastTaskProgress")
+  reviewEvents    ReviewEvent[]
 
   @@unique([projectId, sequence])
   @@index([projectId, status])
+}
+
+model User {
+  id             String           @id @default(cuid())
+  username       String           @unique
+  displayName    String
+  passwordHash   String
+  isAdmin        Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  sessions       Session[]
+  ownedProjects  Project[]        @relation("ProjectOwner")
+  memberships    ProjectMember[]
+  reviews        TaskReview[]
+  progress       ReviewProgress[]
+  assignments    TaskAssignment[]
+  reviewEvents   ReviewEvent[]    @relation("ReviewEventReviewer")
+  authoredEvents ReviewEvent[]    @relation("ReviewEventActor")
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model ProjectMember {
+  projectId String
+  userId    String
+  role      String   @default("REVIEWER")
+  joinedAt  DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, userId])
+  @@index([userId])
+}
+
+model TaskAssignment {
+  taskId    String
+  userId    String
+  createdAt DateTime @default(now())
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, userId])
+  @@index([userId])
+}
+
+model TaskReview {
+  id         String   @id @default(cuid())
+  taskId     String
+  reviewerId String
+  status     String
+  remark     String?
+  reviewedAt DateTime @default(now())
+  version    Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  reviewer   User     @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, reviewerId])
+  @@index([reviewerId, status])
+  @@index([taskId, status])
+}
+
+model ReviewProgress {
+  projectId  String
+  userId     String
+  lastTaskId String?
+  filter     String   @default("ALL")
+  updatedAt  DateTime @updatedAt
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastTask   Task?    @relation("LastTaskProgress", fields: [lastTaskId], references: [id], onDelete: SetNull)
+
+  @@id([projectId, userId])
+  @@index([lastTaskId])
+}
+
+model ReviewEvent {
+  id             String   @id @default(cuid())
+  taskId         String
+  reviewerId     String
+  actorId        String
+  previousStatus String?
+  newStatus      String
+  previousRemark String?
+  newRemark      String?
+  version        Int
+  createdAt      DateTime @default(now())
+  task           Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  reviewer       User     @relation("ReviewEventReviewer", fields: [reviewerId], references: [id], onDelete: Cascade)
+  actor          User     @relation("ReviewEventActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([taskId, reviewerId, createdAt])
+  @@index([actorId, createdAt])
 }

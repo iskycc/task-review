@@ -1,6 +1,6 @@
 import { REMARK_MAX_LENGTH } from './config'
 
-export type ReviewStatus = 'PASSED' | 'DEFERRED'
+export type ReviewStatus = 'PENDING' | 'PASSED' | 'DEFERRED'
 
 export interface ReviewInput {
   status: string
@@ -9,7 +9,7 @@ export interface ReviewInput {
 
 /** Returns the error message, or null when the input is valid. */
 export function validateReviewInput(input: ReviewInput): string | null {
-  if (input.status !== 'PASSED' && input.status !== 'DEFERRED') {
+  if (input.status !== 'PENDING' && input.status !== 'PASSED' && input.status !== 'DEFERRED') {
     return '无效的审核状态'
   }
   if (input.remark !== undefined && input.remark.length > REMARK_MAX_LENGTH) {

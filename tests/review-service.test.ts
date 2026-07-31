@@ -112,7 +112,8 @@ describe('updateLastPosition', () => {
     const project = await createProjectWithTasks(['一', '二'])
     const task = await prisma.task.findFirstOrThrow({ where: { projectId: project.id, sequence: 2 } })
     await updateLastPosition(project.id, task.id)
-    expect((await prisma.project.findUniqueOrThrow({ where: { id: project.id } })).lastTaskId).toBe(task.id)
+    const owner = await prisma.projectMember.findFirstOrThrow({ where: { projectId: project.id } })
+    expect((await prisma.reviewProgress.findUniqueOrThrow({ where: { projectId_userId: { projectId: project.id, userId: owner.userId } } })).lastTaskId).toBe(task.id)
   })
 
   it('rejects task from another project', async () => {

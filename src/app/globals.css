@@ -4,15 +4,15 @@
 
 :root {
   /* Surfaces */
-  --background: #f5f5f7;
+  --background: #f4f4f1;
   --surface-primary: #ffffff;
-  --surface-secondary: #f2f2f7;
+  --surface-secondary: #efefec;
   --surface-elevated: #ffffff;
   --fill: rgba(0, 0, 0, 0.06);
   --fill-hover: rgba(0, 0, 0, 0.1);
 
   /* Separators & labels */
-  --separator: rgba(0, 0, 0, 0.08);
+  --separator: rgba(0, 0, 0, 0.1);
   --label-primary: #1d1d1f;
   --label-secondary: #6e6e73;
   --label-tertiary: #75757b;
@@ -28,9 +28,9 @@
   --danger-label: #d70015;
 
   /* Radius */
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
 
   /* Motion */
@@ -83,13 +83,22 @@ html {
 }
 
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI",
-    system-ui, sans-serif;
+  font-family: "Noto Sans SC Variable", "Noto Sans SC", system-ui, sans-serif;
+  font-weight: 400;
+  font-synthesis: none;
+  font-optical-sizing: auto;
   background-color: var(--background);
   color: var(--label-primary);
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
 
 ::selection {
@@ -117,17 +126,17 @@ body {
 
 /* Typography scale — semantic classes for pages/components to adopt. */
 .text-page-title {
-  font-size: 40px;
-  line-height: 1.1;
-  font-weight: 700;
-  letter-spacing: -0.025em;
+  font-size: 42px;
+  line-height: 1.04;
+  font-weight: 600;
+  letter-spacing: -0.035em;
 }
 
 .text-section-title {
   font-size: 24px;
   line-height: 1.2;
   font-weight: 600;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.015em;
 }
 
 .text-card-title {
@@ -139,16 +148,18 @@ body {
 .text-body {
   font-size: 15px;
   line-height: 1.6;
+  font-weight: 400;
 }
 
 .text-auxiliary {
   font-size: 12px;
   line-height: 1.5;
+  font-weight: 400;
 }
 
 @media (min-width: 640px) {
   .text-page-title {
-    font-size: 48px;
+    font-size: 64px;
   }
   .text-section-title {
     font-size: 28px;
@@ -161,6 +172,128 @@ body {
   }
   .text-auxiliary {
     font-size: 14px;
+  }
+}
+
+/* Editorial layout used across the content-first concept. */
+.editorial-shell {
+  width: min(100%, 1180px);
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+.editorial-kicker {
+  color: var(--tint);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.editorial-display {
+  max-width: 12em;
+  font-size: clamp(2.75rem, 8vw, 5.5rem);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.editorial-rule {
+  height: 2px;
+  width: 48px;
+  border-radius: 999px;
+  background: var(--tint);
+}
+
+.paper-surface {
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  background: var(--surface-primary);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02), 0 18px 50px rgba(0, 0, 0, 0.045);
+}
+
+.field-control {
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-md);
+  background: var(--surface-primary);
+  color: var(--label-primary);
+  padding-inline: 14px;
+  outline: none;
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.field-control::placeholder {
+  color: var(--label-tertiary);
+}
+
+.field-control:focus {
+  border-color: var(--tint);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tint) 16%, transparent);
+}
+
+.review-action-dock {
+  position: relative;
+  z-index: 30;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  padding: 14px 20px max(14px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--separator);
+  background: color-mix(in srgb, var(--surface-primary) 92%, transparent);
+  box-shadow: 0 -10px 32px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(22px) saturate(1.35);
+}
+
+.app-body {
+  padding-top: calc(56px + env(safe-area-inset-top));
+}
+
+.app-topbar {
+  box-sizing: border-box;
+  height: calc(56px + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+}
+
+@media (min-width: 640px) {
+  .editorial-shell {
+    padding-inline: 32px;
+  }
+
+  .review-action-dock {
+    position: sticky;
+    bottom: 16px;
+    width: auto;
+    margin-inline: 0;
+    padding: 16px 18px;
+    border: 1px solid var(--separator);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.11);
+  }
+
+  .app-body {
+    padding-top: calc(60px + env(safe-area-inset-top));
+  }
+
+  .app-topbar {
+    height: calc(60px + env(safe-area-inset-top));
+  }
+}
+
+@media (min-width: 1024px) {
+  .editorial-shell {
+    padding-inline: 40px;
+  }
+}
+
+@media (max-width: 374px) {
+  .editorial-shell {
+    padding-inline: 16px;
+  }
+
+  .editorial-display {
+    font-size: 2.45rem;
   }
 }
 

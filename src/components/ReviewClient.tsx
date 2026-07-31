@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Check, PauseCircle } from 'lucide-react'
 import { Button, Card, Modal, Progress, TextArea, Toast } from '@/components/ui'
 import { TaskStatusBadge } from './TaskStatusBadge'
+import { AssignmentControl } from './AssignmentControl'
+import { ReviewHistory } from './ReviewHistory'
 
 interface TaskData {
   id: string
@@ -13,15 +15,21 @@ interface TaskData {
   pageNumber: number | null
   status: string
   remark: string | null
+  reviewVersion: number
+  reviewedAt: string | null
+  assigned: boolean
 }
 
 interface ReviewClientProps {
   project: { id: string; name: string; totalTasks: number }
   initialTask: TaskData
   initialProcessed: number
+  initialFilter: 'ALL' | 'PENDING' | 'PASSED' | 'DEFERRED' | 'ASSIGNED'
+  canReview: boolean
+  canManage: boolean
 }
 
-type SavingAction = 'PASSED' | 'DEFERRED'
+type SavingAction = 'PENDING' | 'PASSED' | 'DEFERRED'
 
 const REMARK_LIMIT = 2000
 /** Warn progressively when the remark approaches the limit. */
@@ -29,14 +37,7 @@ const REMARK_WARN_AT = 1800
 /** Clamp long task text so the action bar stays reachable without scrolling. */
 const CONTENT_CLAMP_CLASS = 'max-h-[38vh] overflow-hidden'
 
-/** Adaptive reader size: short lines get larger type, long passages smaller. */
-function contentSizeClass(length: number): string {
-  if (length <= 60) return 'text-2xl leading-relaxed'
-  if (length <= 300) return 'text-xl leading-relaxed'
-  return 'text-lg leading-relaxed'
-}
-
-export function ReviewClient({ project, initialTask, initialProcessed }: ReviewClientProps) {
+export function ReviewClient({ project, initialTask, initialProcessed, initialFilter, canReview, canManage }: ReviewClientProps) {
   const router = useRouter()
   const [task, setTask] = useState<TaskData>(initialTask)
   const [remarkDraft, setRemarkDraft] = useState(initialTask.remark ?? '')
@@ -45,12 +46,13 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
   const [error, setError] = useState<{ text: string; retry?: () => void } | null>(null)
   const [toast, setToast] = useState<{ id: number; text: string } | null>(null)
   const [pendingSeq, setPendingSeq] = useState<number | null>(null)
+  const [pendingDirection, setPendingDirection] = useState<'previous' | 'next' | null>(null)
+  const [pendingHref, setPendingHref] = useState<string | null>(null)
   const [remarkFocused, setRemarkFocused] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [overflowing, setOverflowing] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLParagraphElement>(null)
-  const cacheRef = useRef(new Map<number, TaskData>([[initialTask.sequence, initialTask]]))
   const actionTokenRef = useRef(0)
   const savingRef = useRef(false)
 
@@ -63,13 +65,10 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
 
   const fetchTask = useCallback(
     async (seq: number): Promise<TaskData | null> => {
-      const cached = cacheRef.current.get(seq)
-      if (cached) return cached
       try {
-        const res = await fetch(`/api/projects/${project.id}/tasks/${seq}`)
+        const res = await fetch(`/api/projects/${project.id}/tasks/${seq}`, { cache: 'no-store' })
         if (!res.ok) return null
         const body = await res.json()
-        cacheRef.current.set(seq, body.task)
         return body.task as TaskData
       } catch {
         return null
@@ -79,17 +78,12 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
   )
 
   useEffect(() => {
-    if (!isFirst) void fetchTask(task.sequence - 1)
-    if (!isLast) void fetchTask(task.sequence + 1)
-  }, [task.sequence, isFirst, isLast, fetchTask])
-
-  useEffect(() => {
     void fetch(`/api/projects/${project.id}/progress`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ taskId: task.id }),
+      body: JSON.stringify({ taskId: task.id, filter: initialFilter }),
     }).catch(() => undefined)
-  }, [project.id, task.id])
+  }, [project.id, task.id, initialFilter])
 
   useEffect(() => {
     contentRef.current?.focus({ preventScroll: true })
@@ -122,7 +116,8 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
     setRemarkDraft(next.remark ?? '')
     setError(null)
     // Use native history.replaceState to update the URL only, avoiding a Next.js route transition/re-fetch.
-    window.history.replaceState(null, '', `/projects/${project.id}/review/${next.sequence}`)
+    const query = initialFilter === 'ALL' ? '' : `?filter=${initialFilter}`
+    window.history.replaceState(null, '', `/projects/${project.id}/review/${next.sequence}${query}`)
   }
 
   const doNavigate = async (seq: number) => {
@@ -145,6 +140,30 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
     void doNavigate(seq)
   }
 
+  const navigateDirection = async (direction: 'previous' | 'next', ignoreDirty = false) => {
+    if (saving) return
+    if (dirty && !ignoreDirty) {
+      setPendingDirection(direction)
+      setPendingSeq(direction === 'previous' ? task.sequence - 1 : task.sequence + 1)
+      return
+    }
+    if (initialFilter === 'ALL') {
+      requestNavigate(task.sequence + (direction === 'previous' ? -1 : 1))
+      return
+    }
+    const token = ++actionTokenRef.current
+    try {
+      const response = await fetch(`/api/projects/${project.id}/tasks?filter=${initialFilter}&direction=${direction}&current=${task.sequence}`, { cache: 'no-store' })
+      const body = await response.json()
+      if (token !== actionTokenRef.current) return
+      if (!response.ok) throw new Error()
+      if (body.task) applyTask(body.task)
+      else if (direction === 'next') router.push(`/projects/${project.id}/result`)
+    } catch {
+      setError({ text: '加载失败，请检查网络后重试', retry: () => void navigateDirection(direction) })
+    }
+  }
+
   // Arrow-key navigation with on-screen hints; never fires while typing in inputs.
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -153,20 +172,31 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
       if (pendingSeq !== null) return
       const target = event.target as HTMLElement | null
       if (target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.isContentEditable)) return
-      requestNavigate(task.sequence + (event.key === 'ArrowLeft' ? -1 : 1))
+      void navigateDirection(event.key === 'ArrowLeft' ? 'previous' : 'next')
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [task.sequence, pendingSeq, requestNavigate])
 
   const confirmPendingNavigation = () => {
+    if (pendingHref) {
+      const href = pendingHref
+      setRemarkDraft(task.remark ?? '')
+      setPendingHref(null)
+      router.push(href)
+      return
+    }
     if (pendingSeq === null) return
     const seq = pendingSeq
+    const direction = pendingDirection
+    setRemarkDraft(task.remark ?? '')
     setPendingSeq(null)
-    void doNavigate(seq)
+    setPendingDirection(null)
+    if (initialFilter !== 'ALL' && direction) void navigateDirection(direction, true)
+    else void doNavigate(seq)
   }
 
-  const saveReview = async (status: SavingAction) => {
+  const saveReview = async (status: SavingAction, advance = true) => {
     if (savingRef.current) return
     if (status === 'DEFERRED' && remarkDraft.trim().length === 0) {
       setError({ text: '暂时遗留必须填写备注' })
@@ -181,25 +211,45 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
       const res = await fetch(`/api/tasks/${task.id}/review`, {
         method: 'PATCH',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ projectId: project.id, status, remark: remarkDraft }),
+        body: JSON.stringify({ projectId: project.id, status, remark: remarkDraft, expectedVersion: task.reviewVersion }),
       })
       const body = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError({ text: body.error ?? '保存失败，请重试', retry: () => void saveReview(status) })
+        if (res.status === 409) {
+          setError({ text: body.error ?? '该任务已被更新', retry: () => void fetchTask(task.sequence).then((current) => { if (current) applyTask(current) }) })
+        } else {
+          setError({ text: body.error ?? '保存失败，请重试', retry: () => void saveReview(status, advance) })
+        }
         return
       }
-      const updated: TaskData = { ...task, status, remark: remarkDraft === '' ? null : remarkDraft }
-      cacheRef.current.set(task.sequence, updated)
-      const wasPending = task.status === 'PENDING'
+      const updated: TaskData = { ...task, ...body.task }
       setTask(updated)
-      setProcessed((p) => (wasPending ? p + 1 : p))
+      setRemarkDraft(updated.remark ?? '')
+      setProcessed(body.progress.passedTasks + body.progress.deferredTasks)
 
-      if (isLast) {
+      if (!advance) {
+        setToast({ id: Date.now(), text: '备注已保存' })
+        return
+      }
+      if (initialFilter !== 'ALL') {
+        const nextResponse = await fetch(`/api/projects/${project.id}/tasks?filter=${initialFilter}&direction=next&current=${task.sequence}`, { cache: 'no-store' })
+        const nextBody = await nextResponse.json().catch(() => ({}))
+        if (!nextResponse.ok) {
+          setError({ text: '审核已保存，但下一条加载失败', retry: () => void navigateDirection('next') })
+          return
+        }
+        if (nextBody.task) applyTask(nextBody.task)
+        else router.push(`/projects/${project.id}/result`)
+        setToast({ id: Date.now(), text: status === 'PASSED' ? '已通过' : '已暂留' })
+        return
+      }
+      if (isLast || body.progress.pendingTasks === 0) {
         router.push(`/projects/${project.id}/result`)
         return
       }
       const next = await fetchTask(task.sequence + 1)
       if (next) applyTask(next)
+      else setError({ text: '审核已保存，但下一条加载失败', retry: () => void doNavigate(task.sequence + 1) })
       setToast({ id: Date.now(), text: status === 'PASSED' ? '已通过' : '已暂留' })
     } catch {
       setError({ text: '网络异常，保存失败，请重试', retry: () => void saveReview(status) })
@@ -208,6 +258,30 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
       setSavingAction(null)
     }
   }
+
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => {
+      if (!dirty) return
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [dirty])
+
+  useEffect(() => {
+    const interceptLinks = (event: MouseEvent) => {
+      if (!dirty || event.defaultPrevented || event.button !== 0) return
+      const target = event.target as Element | null
+      const anchor = target?.closest('a[href]') as HTMLAnchorElement | null
+      if (!anchor || anchor.target === '_blank' || anchor.origin !== window.location.origin) return
+      event.preventDefault()
+      event.stopPropagation()
+      setPendingHref(`${anchor.pathname}${anchor.search}${anchor.hash}`)
+    }
+    document.addEventListener('click', interceptLinks, true)
+    return () => document.removeEventListener('click', interceptLinks, true)
+  }, [dirty])
 
   const percent = project.totalTasks > 0 ? Math.round((processed / project.totalTasks) * 100) : 0
   const remaining = Math.max(0, project.totalTasks - processed)
@@ -221,44 +295,41 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
         : 'text-[var(--label-tertiary)]'
 
   return (
-    <div>
-      {/* Compact progress header: position + progress in one row. */}
-      <header className="mb-6 space-y-2">
-        <div className="flex items-baseline justify-between gap-4">
-          <p className="text-sm text-[var(--label-secondary)]">
-            第 <span className="text-base font-semibold tabular-nums text-[var(--label-primary)]">{task.sequence}</span>
-            <span className="tabular-nums"> / {project.totalTasks}</span> 条
-            <span className="mx-2 text-[var(--label-tertiary)]" aria-hidden="true">
-              ·
-            </span>
-            已处理 <span className="tabular-nums">{processed}</span>，剩余 <span className="tabular-nums">{remaining}</span>
-          </p>
-          <p className="shrink-0 text-sm font-semibold tabular-nums text-[var(--label-primary)]">{percent}%</p>
+    <div className="mx-auto max-w-[1060px]">
+      <header className="mb-8 grid gap-8 sm:mb-10 md:grid-cols-[minmax(0,1fr)_280px] md:items-end">
+        <div>
+          <p className="editorial-kicker">Reviewing</p>
+          <h1 className="mt-3 max-w-3xl break-words text-[36px] font-semibold leading-[1.06] tracking-[-0.045em] sm:text-[56px]">{project.name}</h1>
+          <div className="editorial-rule mt-5" aria-hidden="true" />
         </div>
-        <Progress value={processed} max={project.totalTasks} label="审核进度" />
+        <div className="space-y-3">
+          <div className="flex items-baseline justify-between gap-4"><p className="text-sm text-[var(--label-secondary)]">
+            第 <span className="text-base font-medium tabular-nums text-[var(--label-primary)]">{task.sequence}</span>
+            <span className="tabular-nums"> / {project.totalTasks}</span> 条
+          </p><p className="shrink-0 text-sm font-medium tabular-nums text-[var(--label-primary)]">{percent}%</p></div>
+          <Progress value={processed} max={project.totalTasks} label="审核进度" />
+          <p className="text-xs text-[var(--label-tertiary)]">已处理 {processed}，剩余 {remaining}</p>
+        </div>
       </header>
 
       {/* Middle zone: distraction-free task reader. */}
-      <Card className="p-6 sm:p-10">
+      <Card className="min-h-[390px] p-5 sm:min-h-[480px] sm:p-10 lg:p-14">
         <div
           ref={contentRef}
           tabIndex={-1}
           aria-labelledby={`task-content-${task.id}`}
           className="outline-none"
         >
-          <div className="mb-6 flex items-baseline justify-between gap-3">
-            <TaskStatusBadge status={task.status} />
-            {task.pageNumber !== null && (
-              <span className="shrink-0 text-xs tabular-nums text-[var(--label-tertiary)]">第 {task.pageNumber} 页</span>
-            )}
+          <div className="mb-10 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--separator)] pb-5">
+            <div className="flex flex-wrap items-center gap-2"><TaskStatusBadge status={task.status} /><ReviewHistory taskId={task.id} />{canManage && <AssignmentControl taskId={task.id} />}</div>
+            {task.pageNumber !== null && <span className="shrink-0 text-xs tabular-nums text-[var(--label-tertiary)]">第 {task.pageNumber} 页</span>}
           </div>
-          <div className="relative">
+          <div className="relative mx-auto max-w-[44rem] py-2 sm:py-8">
             <p
               id={`task-content-${task.id}`}
               ref={textRef}
               className={[
-                'max-w-[36em] whitespace-pre-wrap break-words text-[var(--label-primary)]',
-                contentSizeClass(task.content.length),
+                'whitespace-pre-wrap break-words text-[21px] font-normal leading-[1.78] tracking-[-0.015em] text-[var(--label-primary)] sm:text-[27px] sm:leading-[1.7]',
                 expanded ? '' : CONTENT_CLAMP_CLASS,
               ].join(' ')}
             >
@@ -289,7 +360,7 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
       </Card>
 
       {/* Bottom zone: sticky action bar with remark + grouped actions. */}
-      <div className="sticky bottom-0 z-30 -mx-6 mt-8 border-t border-[var(--separator)] bg-[var(--background)]/85 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur-xl backdrop-saturate-[1.8]">
+      <div className="review-action-dock mt-6 sm:mt-8">
         {/* Errors announce themselves via Toast's role="alert" — no extra aria-live wrapper. */}
         {error && (
           <Toast kind="error" className="mb-3">
@@ -327,24 +398,24 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
             id="remark"
             value={remarkDraft}
             maxLength={REMARK_LIMIT}
+            disabled={!canReview}
             rows={2}
+            className="h-12 min-h-12 focus:h-24 sm:h-auto sm:min-h-0"
             onChange={(e) => setRemarkDraft(e.target.value)}
             onFocus={() => setRemarkFocused(true)}
             onBlur={() => setRemarkFocused(false)}
             placeholder="填写备注…"
             aria-describedby="remark-hint"
           />
-          <p id="remark-hint" className={`mt-1.5 text-xs text-[var(--label-tertiary)] ${remarkEmphasized ? '' : 'invisible'}`}>
-            暂时遗留时必填，不超过 {REMARK_LIMIT} 字
-          </p>
+          <p id="remark-hint" className={remarkEmphasized ? 'mt-1.5 text-xs text-[var(--label-tertiary)]' : 'sr-only'}>暂时遗留时必填，不超过 {REMARK_LIMIT} 字</p>
         </div>
 
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
+        <div className="mt-3 grid gap-2 sm:grid-cols-[auto_1fr] sm:items-center sm:gap-4">
+          <div className="grid grid-cols-2 gap-2">
             <Button
               variant="secondary"
               disabled={isFirst || saving}
-              onClick={() => requestNavigate(task.sequence - 1)}
+              onClick={() => void navigateDirection('previous')}
               title="上一条（←）"
               aria-keyshortcuts="ArrowLeft"
               className="flex-1 sm:flex-none"
@@ -355,7 +426,7 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
             <Button
               variant="secondary"
               disabled={isLast || saving}
-              onClick={() => requestNavigate(task.sequence + 1)}
+              onClick={() => void navigateDirection('next')}
               title={`${nextLabel}（→）`}
               aria-keyshortcuts="ArrowRight"
               className="flex-1 sm:flex-none"
@@ -364,11 +435,16 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
               <ChevronRight className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end">
+            {dirty && canReview && (
+              <Button variant="ghost" loading={savingAction === 'PENDING'} disabled={saving} onClick={() => void saveReview(task.status as SavingAction, false)} className="col-span-2 sm:flex-none">
+                保存备注
+              </Button>
+            )}
             <Button
               variant="secondary"
               loading={savingAction === 'DEFERRED'}
-              disabled={saving}
+              disabled={saving || !canReview}
               onClick={() => void saveReview('DEFERRED')}
               className="flex-1 sm:flex-none"
             >
@@ -377,7 +453,7 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
             </Button>
             <Button
               loading={savingAction === 'PASSED'}
-              disabled={saving}
+              disabled={saving || !canReview}
               onClick={() => void saveReview('PASSED')}
               className="flex-1 sm:flex-none"
             >
@@ -408,12 +484,12 @@ export function ReviewClient({ project, initialTask, initialProcessed }: ReviewC
 
       {/* Unsaved-remark confirmation replaces the native confirm dialog. */}
       <Modal
-        open={pendingSeq !== null}
-        onClose={() => setPendingSeq(null)}
+        open={pendingSeq !== null || pendingHref !== null}
+        onClose={() => { setPendingSeq(null); setPendingDirection(null); setPendingHref(null) }}
         title="备注尚未保存"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setPendingSeq(null)}>
+            <Button variant="secondary" onClick={() => { setPendingSeq(null); setPendingDirection(null); setPendingHref(null) }}>
               继续编辑
             </Button>
             <Button variant="primary" onClick={confirmPendingNavigation}>

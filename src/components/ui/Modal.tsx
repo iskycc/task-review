@@ -90,7 +90,7 @@ export function Modal({ open, onClose, title, children, footer, dismissible = tr
       aria-labelledby={titleId}
     >
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/35 backdrop-blur-[3px]"
         onClick={dismissible ? onClose : undefined}
         aria-hidden="true"
       />
@@ -98,14 +98,14 @@ export function Modal({ open, onClose, title, children, footer, dismissible = tr
         ref={panelRef}
         tabIndex={-1}
         className={[
-          'relative w-full max-w-md border border-[var(--separator)] bg-[var(--surface-primary)] p-6',
-          'rounded-t-[var(--radius-lg)] sm:rounded-[var(--radius-lg)]',
+          'relative max-h-[92dvh] w-full max-w-md overflow-y-auto border border-[var(--separator)] bg-[var(--surface-primary)] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-7',
+          'rounded-t-[24px] sm:rounded-[var(--radius-lg)]',
           'shadow-[0_24px_64px_rgba(0,0,0,0.24)]',
         ].join(' ')}
       >
         <h2 id={titleId} className="text-card-title text-[var(--label-primary)]">{title}</h2>
         <div className="mt-2 text-sm leading-[1.6] text-[var(--label-secondary)]">{children}</div>
-        {footer && <div className="mt-6 flex justify-end gap-3">{footer}</div>}
+        {footer && <div className="mt-6 flex flex-wrap justify-end gap-2 sm:gap-3">{footer}</div>}
       </div>
     </div>
   )

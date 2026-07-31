@@ -24,7 +24,7 @@ export function UploadButton() {
   const [phase, setPhase] = useState<UploadPhase>('pick')
   const [stage, setStage] = useState('')
   const [progress, setProgress] = useState(0)
-  const [taskCount, setTaskCount] = useState(0)
+  const uploadKeyRef = useRef('')
   const [errorMessage, setErrorMessage] = useState('')
 
   // The API uploads and parses in a single request, so surface both stages
@@ -61,6 +61,7 @@ export function UploadButton() {
   const pickFile = (next: File | null | undefined) => {
     if (!next) return
     setFile(next)
+    uploadKeyRef.current = crypto.randomUUID()
     if (!next.name.toLowerCase().endsWith('.pdf')) {
       setFileError('仅支持 .pdf 文件')
     } else if (next.size === 0) {
@@ -78,7 +79,7 @@ export function UploadButton() {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      const res = await fetch('/api/projects', { method: 'POST', body: formData })
+      const res = await fetch('/api/projects', { method: 'POST', body: formData, headers: { 'idempotency-key': uploadKeyRef.current } })
       const body = await res.json()
       if (!res.ok) {
         setErrorMessage(body.error ?? '上传失败，请重试')
@@ -87,7 +88,6 @@ export function UploadButton() {
         return
       }
       setProgress(100)
-      setTaskCount(body.taskCount)
       setPhase('success')
       router.refresh()
     } catch {
@@ -193,7 +193,7 @@ export function UploadButton() {
         )}
 
         {phase === 'success' && (
-          <Toast kind="success" className="motion-safe:animate-toast-in">导入成功，已创建 {taskCount} 条任务。</Toast>
+          <Toast kind="success" className="motion-safe:animate-toast-in">上传成功，系统正在后台解析 PDF。项目列表会自动更新。</Toast>
         )}
         {phase === 'error' && <Toast kind="error">{errorMessage}</Toast>}
       </Modal>

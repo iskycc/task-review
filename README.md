@@ -16,15 +16,19 @@
 - 自动保存审核状态、备注与最后停留位置
 - 展示项目进度和审核结果汇总
 - 支持亮色、深色及系统主题
+- 本地账号登录、项目成员与角色权限
+- 每位审核人独立的审核状态、备注和恢复位置
+- 任务总览、筛选、搜索、分页、序号跳转与任务分派
+- 乐观并发控制、审核操作历史和 CSV 导出
 - SQLite 数据与原始 PDF 持久化存储
 - 提供 Docker 镜像、健康检查和 Docker Compose 配置
 
 ## 快速部署
 
-推荐直接使用 Docker Hub 上的生产镜像：
+推荐直接使用 GitHub Container Registry 上的生产镜像：
 
 ```text
-iskycc/pdf-task-review:latest
+ghcr.io/iskycc/task-review:latest
 ```
 
 克隆仓库并启动：
@@ -59,18 +63,24 @@ Compose 会创建 `pdf-task-review-data` 数据卷，用于持久化 SQLite 数�
 APP_PORT=3000
 IMAGE_TAG=latest
 PDF_MAX_SIZE_MB=20
+PDF_PARSE_TIMEOUT_MS=300000
+USER_STORAGE_QUOTA_MB=1024
+ALLOW_REGISTRATION=true
 ```
 
 | 变量 | 默认值 | 说明 |
 | --- | --- | --- |
 | `APP_PORT` | `3000` | 映射到宿主机的访问端口，仅用于 Compose |
-| `IMAGE_TAG` | `latest` | Docker 镜像标签，可固定为 `0.1.0` |
+| `IMAGE_TAG` | `latest` | Docker 镜像标签，可固定为 `v0.1.0` |
 | `PDF_MAX_SIZE_MB` | `20` | 单个 PDF 的最大体积，单位 MB |
+| `PDF_PARSE_TIMEOUT_MS` | `300000` | PDF 后台解析超时，单位毫秒 |
+| `USER_STORAGE_QUOTA_MB` | `1024` | 每位项目负责人的文件存储配额 |
+| `ALLOW_REGISTRATION` | `false`（Docker） | 已有账号后是否允许公开注册 |
 
 当前发布的镜像标签：
 
-- `iskycc/pdf-task-review:latest`
-- `iskycc/pdf-task-review:0.1.0`
+- `ghcr.io/iskycc/task-review:latest`
+- `ghcr.io/iskycc/task-review:v0.1.0`
 
 当前镜像平台为 `linux/amd64`。
 
@@ -106,6 +116,9 @@ http://localhost:3000
 DATABASE_URL="file:./dev.db"
 UPLOAD_DIR="data/uploads"
 PDF_MAX_SIZE_MB=20
+PDF_PARSE_TIMEOUT_MS=300000
+USER_STORAGE_QUOTA_MB=1024
+ALLOW_REGISTRATION=true
 ```
 
 | 变量 | 默认值 | 说明 |
@@ -113,6 +126,9 @@ PDF_MAX_SIZE_MB=20
 | `DATABASE_URL` | `file:./dev.db` | Prisma 使用的 SQLite 数据库地址 |
 | `UPLOAD_DIR` | `data/uploads` | 原始 PDF 保存目录 |
 | `PDF_MAX_SIZE_MB` | `20` | 上传文件大小限制 |
+| `PDF_PARSE_TIMEOUT_MS` | `300000` | PDF 解析超时，单位毫秒 |
+| `USER_STORAGE_QUOTA_MB` | `1024` | 单个项目负责人的存储配额，单位 MB |
+| `ALLOW_REGISTRATION` | `true` | 是否允许已有账号后的公开注册 |
 
 ## 常用命令
 
@@ -197,7 +213,7 @@ npm run sample:pdf
 
 - 仅支持包含可复制文本的 PDF，不支持扫描件 OCR。
 - 不支持加密或需要密码的 PDF。
-- 暂不支持批量上传、多人协作和权限管理。
+- 暂不支持批量上传和外部身份提供商单点登录。
 - 暂不支持 PDF 原页面对照预览。
 - 暂不支持导出审核报告。
 

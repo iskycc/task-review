@@ -21,7 +21,7 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
           ref={ref}
           id={id}
           className={[
-            'w-full rounded-[var(--radius-md)] border border-[var(--separator)] bg-[var(--surface-primary)] px-4 py-3 text-sm',
+            'w-full resize-y rounded-[var(--radius-md)] border border-[var(--separator)] bg-[var(--surface-secondary)] px-4 py-3 text-sm',
             'text-[var(--label-primary)] placeholder:text-[var(--label-tertiary)]',
             'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)]',
             'focus-visible:outline-none focus-visible:border-[var(--tint)] focus-visible:ring-2 focus-visible:ring-[var(--tint)]/20',

@@ -66,7 +66,8 @@ describe('GET /api/projects/[projectId]/tasks?status=', () => {
 
   it('locates first task with given status', async () => {
     const { project, tasks } = await setup()
-    await prisma.task.update({ where: { id: tasks[1].id }, data: { status: 'DEFERRED', remark: '待定' } })
+    const owner = await prisma.projectMember.findFirstOrThrow({ where: { projectId: project.id } })
+    await prisma.taskReview.create({ data: { taskId: tasks[1].id, reviewerId: owner.userId, status: 'DEFERRED', remark: '待定' } })
     const res = await getTasks(
       makeJsonRequest(`/api/projects/${project.id}/tasks?status=DEFERRED`, 'GET'),
       { params: Promise.resolve({ projectId: project.id }) },

@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from 'next'
+import '@fontsource-variable/noto-sans-sc'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { TopBar } from '@/components/TopBar'
+import { getCurrentUser } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'PDF 任务审核',
@@ -9,13 +11,15 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
+  viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f5f5f7' },
+    { media: '(prefers-color-scheme: light)', color: '#f4f4f1' },
     { media: '(prefers-color-scheme: dark)', color: '#111114' },
   ],
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const user = await getCurrentUser()
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
@@ -33,9 +37,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="min-h-screen bg-[var(--bg)] pt-16">
+      <body className="app-body min-h-screen bg-[var(--bg)]">
         <ThemeProvider>
-          <TopBar />
+          <TopBar user={user} />
           {children}
         </ThemeProvider>
       </body>

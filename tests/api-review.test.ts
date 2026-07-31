@@ -68,7 +68,8 @@ describe('PATCH /api/projects/[projectId]/progress', () => {
       { params: Promise.resolve({ projectId: project.id }) },
     )
     expect(res.status).toBe(200)
-    expect((await prisma.project.findUniqueOrThrow({ where: { id: project.id } })).lastTaskId).toBe(tasks[1].id)
+    const owner = await prisma.projectMember.findFirstOrThrow({ where: { projectId: project.id } })
+    expect((await prisma.reviewProgress.findUniqueOrThrow({ where: { projectId_userId: { projectId: project.id, userId: owner.userId } } })).lastTaskId).toBe(tasks[1].id)
   })
 
   it('returns 404 for task of another project', async () => {
